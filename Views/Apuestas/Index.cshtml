@@ -105,6 +105,9 @@
     </div>
 </div>
 
+<!-- Token CSRF para AJAX -->
+@Html.AntiForgeryToken()
+
 <!-- Carrito Flotante -->
 <div id="carritoFlotante" class="carrito-flotante d-none">
     <div class="carrito-header">
@@ -223,6 +226,8 @@
                             .then(response => response.text())
                             .then(data => {
                                 document.getElementById('partidosContainer').innerHTML = data;
+                                // Re-inicializar event listeners para los nuevos botones
+                                inicializarBotonesCarrito();
                             })
                             .catch(error => {
                                 console.error('Error:', error);
@@ -234,7 +239,16 @@
 
             // Cargar estado inicial del carrito
             actualizarCarritoFlotante();
+
+            // Inicializar botones del carrito
+            inicializarBotonesCarrito();
         });
+
+        // Función para inicializar botones del carrito en contenido dinámico
+        function inicializarBotonesCarrito() {
+            // Los botones ya tienen onclick definido en el HTML, no necesitamos agregar eventos adicionales
+            // Esta función está aquí por si necesitamos agregar lógica adicional en el futuro
+        }
 
         // Función para agregar al carrito
         function agregarACarrito(partidoId, tipoApuesta, cuota) {
