@@ -17,17 +17,20 @@ namespace Grupo_negro.Controllers
         private readonly DatosSimuladosService _datosService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly CookieService _cookieService;
+        private readonly ApuestaCombinadadService _apuestaCombinadadService;
 
         public ApuestasController(
             ApplicationDbContext context, 
             DatosSimuladosService datosService,
             UserManager<ApplicationUser> userManager,
-            CookieService cookieService)
+            CookieService cookieService,
+            ApuestaCombinadadService apuestaCombinadadService)
         {
             _context = context;
             _datosService = datosService;
             _userManager = userManager;
             _cookieService = cookieService;
+            _apuestaCombinadadService = apuestaCombinadadService;
         }
 
         // GET: /Apuestas
@@ -229,6 +232,194 @@ namespace Grupo_negro.Controllers
             TempData["Success"] = "Preferencias limpiadas correctamente";
             
             return RedirectToAction("Index");
+        }
+
+        // Acciones para apuestas combinadas
+        [HttpPost]
+        public IActionResult AgregarACarrito(int partidoId, TipoApuesta tipoApuesta, decimal cuota)
+        {
+            var partido = _context.Partidos
+                .Include(p => p.EquipoLocal)
+                .Include(p => p.EquipoVisitante)
+                .Include(p => p.Liga)
+                .FirstOrDefault(p => p.Id == partidoId);
+
+            if (partido == null)
+            {
+                return Json(new { success = false, message = "Partido no encontrado" });
+            }
+
+            var descripcionApuesta = tipoApuesta switch
+            {
+                TipoApuesta.GanaLocal => $"Victoria {partido.EquipoLocal?.Nombre}",
+                TipoApuesta.Empate => "Empate",
+                TipoApuesta.GanaVisitante => $"Victoria {partido.EquipoVisitante?.Nombre}",
+                _ => "Apuesta desconocida"
+            };
+
+            var carritoApuesta = new CarritoApuesta
+            {
+                PartidoId = partidoId,
+                NombrePartido = $"{partido.EquipoLocal?.Nombre} vs {partido.EquipoVisitante?.Nombre}",
+                TipoApuesta = tipoApuesta,
+                DescripcionApuesta = descripcionApuesta,
+                Cuota = cuota,
+                FechaPartido = partido.FechaHora,
+                Liga = partido.Liga?.Nombre ?? "Liga desconocida"
+            };
+
+            var agregado = _apuestaCombinadadService.AgregarAlCarrito(carritoApuesta);
+
+            if (agregado)
+            {
+                var cantidadSelecciones = _apuestaCombinadadService.ContarSelecciones();
+                return Json(new { 
+                    success = true, 
+                    message = "Apuesta agregada al carrito",
+                    cantidadSelecciones = cantidadSelecciones
+                });
+            }
+
+            return Json(new { success = false, message = "Error al agregar la apuesta" });
+        }
+
+        [HttpPost]
+        public IActionResult EliminarDeCarrito(int partidoId)
+        {
+            var eliminado = _apuestaCombinadadService.EliminarDelCarrito(partidoId);
+            
+            if (eliminado)
+            {
+                var cantidadSelecciones = _apuestaCombinadadService.ContarSelecciones();
+                return Json(new { 
+                    success = true, 
+                    message = "Apuesta eliminada del carrito",
+                    cantidadSelecciones = cantidadSelecciones
+                });
+            }
+
+            return Json(new { success = false, message = "Error al eliminar la apuesta" });
+        }
+
+        public IActionResult CarritoApuestas()
+        {
+            var resumen = _apuestaCombinadadService.ObtenerResumenCarrito();
+            return View(resumen);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ConfirmarApuestaCombinada(decimal montoApostado)
+        {
+            if (montoApostado <= 0)
+            {
+                TempData["Error"] = "El monto de apuesta debe ser mayor a 0";
+                return RedirectToAction("CarritoApuestas");
+            }
+
+            var carrito = _apuestaCombinadadService.ObtenerCarrito();
+            if (carrito.Count < 2)
+            {
+                TempData["Error"] = "Debe seleccionar al menos 2 apuestas para una apuesta combinada";
+                return RedirectToAction("CarritoApuestas");
+            }
+
+            var usuario = await _userManager.GetUserAsync(User);
+            if (usuario == null)
+            {
+                TempData["Error"] = "Usuario no encontrado";
+                return RedirectToAction("CarritoApuestas");
+            }
+
+            if (usuario.Saldo < montoApostado)
+            {
+                TempData["Error"] = $"Saldo insuficiente. Tu saldo actual es: ${usuario.Saldo:F2}";
+                return RedirectToAction("CarritoApuestas");
+            }
+
+            var cuotaTotal = _apuestaCombinadadService.CalcularCuotaTotal(carrito);
+            var posibleGanancia = _apuestaCombinadadService.CalcularPosibleGanancia(carrito, montoApostado);
+
+            // Crear la apuesta combinada
+            var apuestaCombinada = new ApuestaCombinada
+            {
+                UsuarioId = usuario.Id,
+                MontoApostado = montoApostado,
+                CuotaTotal = cuotaTotal,
+                PosibleGanancia = posibleGanancia,
+                FechaApuesta = DateTime.Now,
+                Estado = EstadoApuesta.Activa,
+                Detalles = carrito.Select(c => new DetalleApuestaCombinada
+                {
+                    PartidoId = c.PartidoId,
+                    TipoApuesta = c.TipoApuesta,
+                    CuotaSeleccionada = c.Cuota,
+                    Estado = EstadoApuesta.Activa
+                }).ToList()
+            };
+
+            try
+            {
+                // Descontar saldo del usuario
+                usuario.Saldo -= montoApostado;
+                _context.Users.Update(usuario);
+
+                // Guardar la apuesta combinada
+                _context.ApuestasCombinadas.Add(apuestaCombinada);
+                await _context.SaveChangesAsync();
+
+                // Limpiar el carrito
+                _apuestaCombinadadService.LimpiarCarrito();
+
+                TempData["Success"] = $"¡Apuesta combinada realizada exitosamente! Posible ganancia: ${posibleGanancia:F2}";
+                return RedirectToAction("MisApuestasCombinadas");
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "Error al procesar la apuesta. Intente nuevamente.";
+                return RedirectToAction("CarritoApuestas");
+            }
+        }
+
+        public async Task<IActionResult> MisApuestasCombinadas()
+        {
+            var usuario = await _userManager.GetUserAsync(User);
+            if (usuario == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var apuestasCombinadas = await _context.ApuestasCombinadas
+                .Include(ac => ac.Detalles)
+                    .ThenInclude(d => d.Partido)
+                        .ThenInclude(p => p.EquipoLocal)
+                .Include(ac => ac.Detalles)
+                    .ThenInclude(d => d.Partido)
+                        .ThenInclude(p => p.EquipoVisitante)
+                .Include(ac => ac.Detalles)
+                    .ThenInclude(d => d.Partido)
+                        .ThenInclude(p => p.Liga)
+                .Where(ac => ac.UsuarioId == usuario.Id)
+                .OrderByDescending(ac => ac.FechaApuesta)
+                .ToListAsync();
+
+            return View(apuestasCombinadas);
+        }
+
+        [HttpGet]
+        public IActionResult ObtenerEstadoCarrito()
+        {
+            var cantidadSelecciones = _apuestaCombinadadService.ContarSelecciones();
+            var carrito = _apuestaCombinadadService.ObtenerCarrito();
+            
+            return Json(new { 
+                cantidadSelecciones = cantidadSelecciones,
+                selecciones = carrito.Select(c => new {
+                    partidoId = c.PartidoId,
+                    nombrePartido = c.NombrePartido,
+                    descripcionApuesta = c.DescripcionApuesta,
+                    cuota = c.Cuota
+                })
+            });
         }
     }
 }

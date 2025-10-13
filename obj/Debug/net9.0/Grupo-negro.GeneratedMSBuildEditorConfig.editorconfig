@@ -44,12 +44,20 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXB1ZXN0YXNcQXBvc3Rhci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Apuestas/CarritoApuestas.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXB1ZXN0YXNcQ2Fycml0b0FwdWVzdGFzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Apuestas/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXB1ZXN0YXNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Apuestas/MisApuestas.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXB1ZXN0YXNcTWlzQXB1ZXN0YXMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Apuestas/MisApuestasCombinadas.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXB1ZXN0YXNcTWlzQXB1ZXN0YXNDb21iaW5hZGFzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Apuestas/_PartidosPartial.cshtml]

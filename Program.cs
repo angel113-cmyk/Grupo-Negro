@@ -42,6 +42,18 @@ builder.Services.AddScoped<Grupo_negro.Services.UsuarioService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<Grupo_negro.Services.CookieService>();
 
+// Registrar servicio de apuestas combinadas
+builder.Services.AddScoped<Grupo_negro.Services.ApuestaCombinadadService>();
+
+// Configurar sesiones para el carrito de apuestas
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
@@ -57,6 +69,8 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
+app.UseSession(); // Habilitar sesiones para el carrito de apuestas
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -16,6 +16,8 @@ namespace Grupo_negro.Data
         public DbSet<Equipo> Equipos { get; set; }
         public DbSet<Partido> Partidos { get; set; }
         public DbSet<Apuesta> Apuestas { get; set; }
+        public DbSet<ApuestaCombinada> ApuestasCombinadas { get; set; }
+        public DbSet<DetalleApuestaCombinada> DetallesApuestasCombinadas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -51,6 +53,25 @@ namespace Grupo_negro.Data
                 entity.HasOne(a => a.Partido)
                     .WithMany(p => p.Apuestas)
                     .HasForeignKey(a => a.PartidoId);
+            });
+
+            // Configuración para apuestas combinadas
+            builder.Entity<ApuestaCombinada>(entity =>
+            {
+                entity.HasOne(ac => ac.Usuario)
+                    .WithMany()
+                    .HasForeignKey(ac => ac.UsuarioId);
+            });
+
+            builder.Entity<DetalleApuestaCombinada>(entity =>
+            {
+                entity.HasOne(dac => dac.ApuestaCombinada)
+                    .WithMany(ac => ac.Detalles)
+                    .HasForeignKey(dac => dac.ApuestaCombinadadId);
+
+                entity.HasOne(dac => dac.Partido)
+                    .WithMany()
+                    .HasForeignKey(dac => dac.PartidoId);
             });
         }
     }

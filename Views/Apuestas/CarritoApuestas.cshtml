@@ -1,0 +1,240 @@
+@model ApuestaCombinadadViewModel
+@{
+    ViewBag.Title = "Carrito de Apuestas Combinadas";
+}
+
+<div class="container-fluid mt-3">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body bg-gradient text-white" style="background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h2 class="mb-1">
+                                <i class="fas fa-shopping-cart me-2"></i>Carrito de Apuestas Combinadas
+                            </h2>
+                            <p class="mb-0 opacity-75">Combina tus apuestas y multiplica tus ganancias</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a asp-action="Index" class="btn btn-light btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Volver a Apuestas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Lista de Selecciones -->
+        <div class="col-lg-8">
+            @if (Model.Selecciones.Any())
+            {
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2 text-primary"></i>
+                            Apuestas Seleccionadas (@Model.CantidadSelecciones)
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        @foreach (var seleccion in Model.Selecciones)
+                        {
+                            <div class="list-group-item border-0 py-3 seleccion-item" data-partido-id="@seleccion.PartidoId">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary rounded-circle p-2 me-3">
+                                                <i class="fas fa-futbol text-white"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1 fw-bold">@seleccion.NombrePartido</h6>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-trophy me-1"></i>@seleccion.Liga
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="text-center">
+                                            <div class="badge bg-success fs-6 px-3 py-2">
+                                                @seleccion.DescripcionApuesta
+                                            </div>
+                                            <div class="text-muted small mt-1">
+                                                @seleccion.FechaPartido.ToString("dd/MM HH:mm")
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        <div class="fw-bold text-primary fs-5">@seleccion.Cuota.ToString("F2")</div>
+                                        <small class="text-muted">Cuota</small>
+                                    </div>
+                                    <div class="col-md-1 text-end">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                onclick="eliminarDelCarrito(@seleccion.PartidoId)" title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card shadow-sm">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">Tu carrito está vacío</h4>
+                        <p class="text-muted">Agrega al menos 2 apuestas para crear una apuesta combinada</p>
+                        <a asp-action="Index" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Agregar Apuestas
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Panel de Resumen y Confirmación -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm sticky-top" style="top: 100px;">
+                <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calculator me-2"></i>Resumen de Apuesta
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Selecciones.Any())
+                    {
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Selecciones:</span>
+                                <span class="fw-bold">@Model.CantidadSelecciones</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="text-muted">Cuota Total:</span>
+                                <span class="fw-bold text-primary fs-5">@Model.CuotaTotal.ToString("F2")</span>
+                            </div>
+                        </div>
+
+                        <form asp-action="ConfirmarApuestaCombinada" method="post">
+                            <div class="mb-3">
+                                <label for="montoApostado" class="form-label">Monto a Apostar</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="montoApostado" name="montoApostado" 
+                                           min="1" max="10000" step="0.01" value="10" onchange="calcularGanancia()">
+                                </div>
+                            </div>
+
+                            <div class="alert alert-light border mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span>Posible Ganancia:</span>
+                                    <span class="fw-bold text-success fs-5" id="posibleGanancia">$@((10 * Model.CuotaTotal).ToString("F2"))</span>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success btn-lg" 
+                                        @(!Model.PuedeApostar ? "disabled" : "")>
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    Confirmar Apuesta Combinada
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="limpiarCarrito()">
+                                    <i class="fas fa-trash me-2"></i>Limpiar Carrito
+                                </button>
+                            </div>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted">
+                            <i class="fas fa-info-circle fa-2x mb-2"></i>
+                            <p class="mb-0">Agrega apuestas para ver el resumen</p>
+                        </div>
+                    }
+                </div>
+
+                @if (Model.Selecciones.Count >= 2)
+                {
+                    <div class="card-footer bg-light">
+                        <div class="text-center">
+                            <small class="text-muted">
+                                <i class="fas fa-lightbulb me-1"></i>
+                                Mientras más selecciones, mayor es el riesgo y la ganancia potencial
+                            </small>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function calcularGanancia() {
+            const monto = parseFloat(document.getElementById('montoApostado').value) || 0;
+            const cuotaTotal = @Model.CuotaTotal;
+            const ganancia = monto * cuotaTotal;
+            
+            document.getElementById('posibleGanancia').textContent = '$' + ganancia.toFixed(2);
+        }
+
+        function eliminarDelCarrito(partidoId) {
+            if (confirm('¿Estás seguro de eliminar esta apuesta del carrito?')) {
+                fetch('@Url.Action("EliminarDeCarrito", "Apuestas")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: 'partidoId=' + partidoId
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error al eliminar la apuesta: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error de conexión');
+                });
+            }
+        }
+
+        function limpiarCarrito() {
+            if (confirm('¿Estás seguro de limpiar todo el carrito?')) {
+                // Eliminar todas las selecciones una por una
+                const partidoIds = @Html.Raw(Json.Serialize(Model.Selecciones.Select(s => s.PartidoId)));
+                
+                Promise.all(partidoIds.map(partidoId => {
+                    return fetch('@Url.Action("EliminarDeCarrito", "Apuestas")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        },
+                        body: 'partidoId=' + partidoId
+                    });
+                })).then(() => {
+                    location.reload();
+                });
+            }
+        }
+
+        // Actualizar el cálculo cuando cambie el monto
+        document.addEventListener('DOMContentLoaded', function() {
+            const montoInput = document.getElementById('montoApostado');
+            if (montoInput) {
+                montoInput.addEventListener('input', calcularGanancia);
+            }
+        });
+    </script>
+}

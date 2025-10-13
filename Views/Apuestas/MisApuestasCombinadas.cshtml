@@ -1,0 +1,232 @@
+@model List<ApuestaCombinada>
+@{
+    ViewBag.Title = "Mis Apuestas Combinadas";
+}
+
+<div class="container-fluid mt-3">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body bg-gradient text-white" style="background: linear-gradient(135deg, #e83e8c 0%, #6f42c1 100%);">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h2 class="mb-1">
+                                <i class="fas fa-history me-2"></i>Mis Apuestas Combinadas
+                            </h2>
+                            <p class="mb-0 opacity-75">Historial de todas tus apuestas combinadas</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a asp-action="CarritoApuestas" class="btn btn-light me-2">
+                                <i class="fas fa-shopping-cart me-2"></i>Carrito
+                            </a>
+                            <a asp-action="Index" class="btn btn-outline-light">
+                                <i class="fas fa-plus me-2"></i>Nueva Apuesta
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="row">
+            @foreach (var apuesta in Model)
+            {
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white border-bottom-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0 fw-bold">
+                                        Apuesta #@apuesta.Id
+                                    </h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        @apuesta.FechaApuesta.ToString("dd/MM/yyyy HH:mm")
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    @{
+                                        var badgeClass = apuesta.Estado switch
+                                        {
+                                            EstadoApuesta.Activa => "bg-primary",
+                                            EstadoApuesta.Ganada => "bg-success",
+                                            EstadoApuesta.Perdida => "bg-danger",
+                                            EstadoApuesta.Cancelada => "bg-secondary",
+                                            _ => "bg-secondary"
+                                        };
+                                        var estadoTexto = apuesta.Estado switch
+                                        {
+                                            EstadoApuesta.Activa => "Activa",
+                                            EstadoApuesta.Ganada => "Ganada",
+                                            EstadoApuesta.Perdida => "Perdida",
+                                            EstadoApuesta.Cancelada => "Cancelada",
+                                            _ => "Desconocido"
+                                        };
+                                    }
+                                    <span class="badge @badgeClass px-3 py-2">@estadoTexto</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <!-- Resumen de la apuesta -->
+                            <div class="row text-center mb-3">
+                                <div class="col-4">
+                                    <div class="border-end">
+                                        <div class="h6 mb-1 text-primary">${@apuesta.MontoApostado.ToString("F2")}</div>
+                                        <small class="text-muted">Apostado</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="border-end">
+                                        <div class="h6 mb-1 text-info">@apuesta.CuotaTotal.ToString("F2")</div>
+                                        <small class="text-muted">Cuota Total</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="h6 mb-1 text-success">${@apuesta.PosibleGanancia.ToString("F2")}</div>
+                                    <small class="text-muted">
+                                        @(apuesta.Estado == EstadoApuesta.Ganada ? "Ganado" : "Posible Ganancia")
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Detalles de las apuestas -->
+                            <div class="mb-2">
+                                <h6 class="text-muted mb-2">
+                                    <i class="fas fa-list me-1"></i>
+                                    Selecciones (@apuesta.Detalles.Count)
+                                </h6>
+                            </div>
+                            
+                            @foreach (var detalle in apuesta.Detalles)
+                            {
+                                <div class="border rounded mb-2 p-2 bg-light">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="flex-grow-1">
+                                            <div class="fw-semibold text-truncate">
+                                                @detalle.Partido?.EquipoLocal?.Nombre vs @detalle.Partido?.EquipoVisitante?.Nombre
+                                            </div>
+                                            <small class="text-muted">
+                                                @{
+                                                    var tipoApuestaTexto = detalle.TipoApuesta switch
+                                                    {
+                                                        TipoApuesta.GanaLocal => $"Victoria {detalle.Partido?.EquipoLocal?.Nombre}",
+                                                        TipoApuesta.Empate => "Empate",
+                                                        TipoApuesta.GanaVisitante => $"Victoria {detalle.Partido?.EquipoVisitante?.Nombre}",
+                                                        _ => "Apuesta desconocida"
+                                                    };
+                                                }
+                                                <i class="fas fa-trophy me-1"></i>@detalle.Partido?.Liga?.Nombre
+                                                | @tipoApuestaTexto
+                                            </small>
+                                        </div>
+                                        <div class="text-end ms-2">
+                                            <div class="fw-bold text-primary">@detalle.CuotaSeleccionada.ToString("F2")</div>
+                                            @{
+                                                var detalleBadgeClass = detalle.Estado switch
+                                                {
+                                                    EstadoApuesta.Activa => "bg-primary",
+                                                    EstadoApuesta.Ganada => "bg-success",
+                                                    EstadoApuesta.Perdida => "bg-danger",
+                                                    EstadoApuesta.Cancelada => "bg-secondary",
+                                                    _ => "bg-secondary"
+                                                };
+                                            }
+                                            <span class="badge @detalleBadgeClass badge-sm">
+                                                @(detalle.Estado == EstadoApuesta.Activa ? "⏳" : 
+                                                  detalle.Estado == EstadoApuesta.Ganada ? "✓" : 
+                                                  detalle.Estado == EstadoApuesta.Perdida ? "✗" : "◯")
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        @if (apuesta.Estado == EstadoApuesta.Activa)
+                        {
+                            <div class="card-footer bg-light text-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-hourglass-half me-1"></i>
+                                    Esperando resultado de los partidos
+                                </small>
+                            </div>
+                        }
+                        else if (apuesta.Estado == EstadoApuesta.Ganada)
+                        {
+                            <div class="card-footer bg-success text-white text-center">
+                                <small>
+                                    <i class="fas fa-trophy me-1"></i>
+                                    ¡Felicidades! Ganaste $@apuesta.PosibleGanancia.ToString("F2")
+                                </small>
+                            </div>
+                        }
+                        else if (apuesta.Estado == EstadoApuesta.Perdida)
+                        {
+                            <div class="card-footer bg-danger text-white text-center">
+                                <small>
+                                    <i class="fas fa-times-circle me-1"></i>
+                                    Apuesta no exitosa
+                                </small>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-chart-line fa-4x text-muted mb-3"></i>
+                        <h3 class="text-muted">No tienes apuestas combinadas</h3>
+                        <p class="text-muted mb-4">
+                            Las apuestas combinadas te permiten multiplicar tus ganancias al combinar múltiples selecciones.
+                            <br>Mientras más selecciones agregues, mayor será tu ganancia potencial.
+                        </p>
+                        <div class="d-flex justify-content-center gap-3">
+                            <a asp-action="Index" class="btn btn-primary btn-lg">
+                                <i class="fas fa-plus me-2"></i>Crear Primera Apuesta Combinada
+                            </a>
+                            <a asp-action="MisApuestas" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-list me-2"></i>Ver Apuestas Simples
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Styles {
+    <style>
+        .badge-sm {
+            font-size: 0.7em;
+            padding: 0.2em 0.4em;
+        }
+        
+        .card-hover {
+            transition: transform 0.2s;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+        }
+        
+        .text-truncate-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+}
