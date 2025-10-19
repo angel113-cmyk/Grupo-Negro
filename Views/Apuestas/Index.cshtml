@@ -75,20 +75,20 @@
                         {
                             @foreach (var liga in (List<Liga>)ViewBag.Ligas)
                             {
-                                <button class="list-group-item list-group-item-action liga-filter border-0 py-3" data-liga="@liga.Id">
-                                    <div class="d-flex align-items-center justify-content-between">
+                                <div class="list-group-item border-0 py-3 d-flex align-items-center justify-content-between">
+                                    <button class="btn btn-link text-start flex-grow-1 liga-filter p-0" data-liga="@liga.Id" style="text-decoration: none;">
                                         <div class="d-flex align-items-center">
                                             <i class="fas fa-trophy text-warning me-3"></i>
                                             <div>
-                                                <div class="fw-semibold">@liga.Nombre</div>
+                                                <div class="fw-semibold text-dark">@liga.Nombre</div>
                                                 <small class="text-muted">@liga.Pais</small>
                                             </div>
                                         </div>
-                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="guardarLigaFavorita(@liga.Id, '@liga.Nombre')" title="Marcar como favorita">
-                                            <i class="fas fa-heart"></i>
-                                        </button>
-                                    </div>
-                                </button>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm ms-2" onclick="event.stopPropagation(); guardarLigaFavorita(@liga.Id, '@liga.Nombre')" title="Marcar como favorita">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                </div>
                             }
                         }
                     </div>
@@ -205,37 +205,45 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             // Manejo de filtros de liga
-            const ligaFilters = document.querySelectorAll('.liga-filter');
-            
-            ligaFilters.forEach(filter => {
-                filter.addEventListener('click', function() {
-                    // Remover clase active de todos los botones
-                    ligaFilters.forEach(f => f.classList.remove('active'));
-                    
-                    // Agregar clase active al botón clickeado
-                    this.classList.add('active');
-                    
-                    const ligaId = this.getAttribute('data-liga');
-                    
-                    if (ligaId == '0') {
-                        // Mostrar todos los partidos
-                        location.reload();
-                    } else {
-                        // Filtrar por liga específica
-                        fetch('@Url.Action("PorLiga", "Apuestas")/' + ligaId)
-                            .then(response => response.text())
-                            .then(data => {
-                                document.getElementById('partidosContainer').innerHTML = data;
-                                // Re-inicializar event listeners para los nuevos botones
-                                inicializarBotonesCarrito();
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                alert('Error al cargar los partidos');
-                            });
-                    }
+            function inicializarFiltrosLiga() {
+                const ligaFilters = document.querySelectorAll('.liga-filter');
+                
+                ligaFilters.forEach(filter => {
+                    filter.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        // Remover clase active de todos los botones
+                        ligaFilters.forEach(f => f.classList.remove('active'));
+                        
+                        // Agregar clase active al botón clickeado
+                        this.classList.add('active');
+                        
+                        const ligaId = this.getAttribute('data-liga');
+                        
+                        if (ligaId == '0') {
+                            // Mostrar todos los partidos
+                            location.reload();
+                        } else {
+                            // Filtrar por liga específica
+                            fetch('@Url.Action("PorLiga", "Apuestas")/' + ligaId)
+                                .then(response => response.text())
+                                .then(data => {
+                                    document.getElementById('partidosContainer').innerHTML = data;
+                                    // Re-inicializar event listeners para los nuevos botones
+                                    inicializarBotonesCarrito();
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    alert('Error al cargar los partidos');
+                                });
+                        }
+                    });
                 });
-            });
+            }
+
+            // Inicializar filtros
+            inicializarFiltrosLiga();
 
             // Cargar estado inicial del carrito
             actualizarCarritoFlotante();

@@ -39,8 +39,19 @@ namespace Grupo_negro.Controllers
             // Inicializar datos simulados si no existen
             await _datosService.InicializarDatosAsync();
 
+            // Verificar si hay partidos con fechas futuras, si no, regenerar
+            var partidosConFechaFutura = await _context.Partidos.CountAsync(p => p.FechaHora > DateTime.Now);
+            if (partidosConFechaFutura == 0)
+            {
+                await _datosService.RegenerarPartidosAsync();
+            }
+
             // Guardar última visita a apuestas
             _cookieService.SetCookie("UltimaVisitaApuestas", DateTime.Now.ToString("dd/MM/yyyy HH:mm"), 30);
+            
+            // Obtener tema preferido del usuario desde cookies
+            var temaPreferido = _cookieService.GetCookie("TemaPreferido") ?? "claro";
+            ViewBag.TemaPreferido = temaPreferido;
             
             // Obtener liga favorita del usuario
             var ligaFavorita = _cookieService.GetCookie("LigaFavorita");

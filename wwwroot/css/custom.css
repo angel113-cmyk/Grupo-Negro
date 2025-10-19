@@ -107,6 +107,25 @@ body, .card, .apuesta-card, .navbar, .list-group-item {
     max-width: 400px;
 }
 
+/* Estilos para filtros de liga */
+.liga-filter {
+    transition: all 0.2s ease;
+}
+
+.liga-filter:hover {
+    background-color: #f8f9fa !important;
+}
+
+.liga-filter.active {
+    background-color: #e3f2fd !important;
+    border-left: 4px solid #2196f3 !important;
+}
+
+.liga-filter.active .text-dark {
+    color: #1976d2 !important;
+    font-weight: 600 !important;
+}
+
 /* Estilos para el carrito flotante */
 .carrito-flotante {
     position: fixed;

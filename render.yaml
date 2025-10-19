@@ -1,0 +1,35 @@
+services:
+  # Servicio web principal
+  - type: web
+    name: grupo-negro-apuestas
+    env: docker
+    repo: https://github.com/Infoyachay/Grupo-Negro
+    branch: deploy/render
+    dockerfilePath: ./Dockerfile
+    region: oregon
+    plan: free
+    
+    # Variables de entorno
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://+:8080
+      - key: ConnectionStrings__DefaultConnection
+        value: Data Source=/data/GrupoNegro.db
+    
+    # Configuración de salud
+    healthCheckPath: /
+    
+    # Disco persistente para la base de datos SQLite
+    disk:
+      name: database
+      mountPath: /data
+      sizeGB: 1
+
+# Opcional: Base de datos PostgreSQL (recomendado para producción)
+# - type: pserv
+#   name: grupo-negro-db
+#   env: docker
+#   plan: free
+#   region: oregon

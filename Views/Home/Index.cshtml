@@ -11,24 +11,7 @@
     </div>
 }
 
-@if (!string.IsNullOrEmpty(ViewBag.TemaActual as string))
-{
-    <div class="alert alert-secondary alert-dismissible fade show d-flex justify-content-between align-items-center" role="alert">
-        <div>
-            <i class="fas fa-palette me-2"></i>
-            Tema actual: <strong>@ViewBag.TemaActual</strong>
-        </div>
-        <div>
-            <button type="button" class="btn btn-outline-primary btn-sm me-2" onclick="cambiarTema('claro')">
-                <i class="fas fa-sun"></i> Claro
-            </button>
-            <button type="button" class="btn btn-outline-dark btn-sm me-2" onclick="cambiarTema('oscuro')">
-                <i class="fas fa-moon"></i> Oscuro
-            </button>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    </div>
-}
+
 
 <div class="container mt-5 animate-fade-in">
     <div class="row justify-content-center">
@@ -124,66 +107,6 @@
 
 @section Scripts {
     <script>
-        // Función para cambiar tema
-        function cambiarTema(tema) {
-            fetch('@Url.Action("CambiarTema", "Home")', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]') ? document.querySelector('input[name="__RequestVerificationToken"]').value : ''
-                },
-                body: 'tema=' + encodeURIComponent(tema)
-            })
-            .then(response => {
-                if (response.ok) {
-                    // Aplicar el tema inmediatamente
-                    aplicarTema(tema);
-                    
-                    // Mostrar mensaje de éxito
-                    const alert = document.createElement('div');
-                    alert.className = 'alert alert-success alert-dismissible fade show position-fixed';
-                    alert.style.top = '20px';
-                    alert.style.right = '20px';
-                    alert.style.zIndex = '9999';
-                    alert.innerHTML = `
-                        <i class="fas fa-palette me-2"></i>Tema ${tema} aplicado correctamente!
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    `;
-                    document.body.appendChild(alert);
-                    
-                    // Auto-remover después de 2 segundos
-                    setTimeout(() => {
-                        if (alert.parentElement) {
-                            alert.remove();
-                        }
-                    }, 2000);
-                } else {
-                    console.error('Error al cambiar tema');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
 
-        // Función para aplicar el tema visualmente
-        function aplicarTema(tema) {
-            const body = document.body;
-            if (tema === 'oscuro') {
-                body.classList.add('tema-oscuro');
-                body.classList.remove('tema-claro');
-            } else {
-                body.classList.add('tema-claro');
-                body.classList.remove('tema-oscuro');
-            }
-        }
-
-        // Aplicar tema al cargar la página
-        document.addEventListener('DOMContentLoaded', function() {
-            const temaActual = '@ViewBag.TemaActual';
-            if (temaActual) {
-                aplicarTema(temaActual);
-            }
-        });
     </script>
 }

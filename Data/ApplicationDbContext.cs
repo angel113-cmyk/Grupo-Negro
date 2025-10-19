@@ -18,6 +18,7 @@ namespace Grupo_negro.Data
         public DbSet<Apuesta> Apuestas { get; set; }
         public DbSet<ApuestaCombinada> ApuestasCombinadas { get; set; }
         public DbSet<DetalleApuestaCombinada> DetallesApuestasCombinadas { get; set; }
+        public DbSet<Comentario> Comentarios { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -72,6 +73,26 @@ namespace Grupo_negro.Data
                 entity.HasOne(dac => dac.Partido)
                     .WithMany()
                     .HasForeignKey(dac => dac.PartidoId);
+            });
+
+            // Configuración para Comentario
+            builder.Entity<Comentario>(entity =>
+            {
+                entity.HasKey(c => c.Id);
+                entity.Property(c => c.Contenido).HasMaxLength(1000).IsRequired();
+                entity.Property(c => c.FechaCreacion).IsRequired();
+                
+                // Relación con Usuario
+                entity.HasOne(c => c.Usuario)
+                      .WithMany()
+                      .HasForeignKey(c => c.UsuarioId)
+                      .OnDelete(DeleteBehavior.Cascade);
+                      
+                // Relación auto-referencial para respuestas
+                entity.HasOne(c => c.ComentarioPadre)
+                      .WithMany(c => c.Respuestas)
+                      .HasForeignKey(c => c.ComentarioPadreId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

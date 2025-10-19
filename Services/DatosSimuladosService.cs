@@ -24,6 +24,19 @@ namespace Grupo_negro.Services
             await _context.SaveChangesAsync();
         }
 
+        public async Task RegenerarPartidosAsync()
+        {
+            // Eliminar partidos existentes
+            var partidosExistentes = await _context.Partidos.ToListAsync();
+            _context.Partidos.RemoveRange(partidosExistentes);
+            
+            // Crear nuevos partidos con fechas futuras
+            await CrearPartidosAsync();
+            await _context.SaveChangesAsync();
+            
+            Console.WriteLine($"Regenerados {partidosExistentes.Count} partidos con fechas futuras");
+        }
+
         private async Task CrearLigasYEquiposAsync()
         {
             // Premier League (Inglaterra)

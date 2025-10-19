@@ -1,0 +1,49 @@
+# Directorios de compilación y output
+bin/
+obj/
+out/
+
+# Visual Studio
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Archivos de base de datos locales
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Archivos de configuración de desarrollo
+appsettings.Development.json
+launchSettings.json
+
+# Node modules (si se usa frontend)
+node_modules/
+npm-debug.log
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+*.log
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentación de desarrollo
+README.md
+DEVELOPMENT.md
+TEAM.md
+*.md
+
+# Archivos temporales
+*.tmp
+*.temp
+*.swp
+*~

@@ -1,0 +1,317 @@
+@model Grupo_negro.Models.ListaComentariosViewModel
+
+@{
+    ViewData["Title"] = "Comentarios de la Comunidad";
+}
+
+<div class="container mt-4">
+    <!-- Header de la sección -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-comments text-primary"></i> Comentarios de la Comunidad</h2>
+                    <p class="text-muted">Comparte tus opiniones y conecta con otros miembros</p>
+                </div>
+                <div class="badge bg-primary fs-6">
+                    @Model.TotalComentarios comentario(s)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes de estado -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Formulario para nuevo comentario -->
+    @if (Model.PuedeComentarUsuario)
+    {
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-edit"></i> Escribe un comentario</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="Crear" method="post">
+                    <div class="mb-3">
+                        <textarea asp-for="NuevoComentario.Contenido" class="form-control" rows="4" 
+                                  placeholder="¿Qué opinas? Comparte tu comentario con la comunidad..."></textarea>
+                        <span asp-validation-for="NuevoComentario.Contenido" class="text-danger"></span>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle"></i> Máximo 1000 caracteres
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Publicar Comentario
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+
+    <!-- Lista de comentarios -->
+    <div class="row">
+        <div class="col-12">
+            @if (Model.Comentarios.Any())
+            {
+                @foreach (var comentario in Model.Comentarios)
+                {
+                    <div class="card mb-4 comentario-card" data-comentario-id="@comentario.Id">
+                        <div class="card-body">
+                            <!-- Header del comentario -->
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-circle me-3">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">@comentario.NombreAutor</h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock"></i>
+                                            @comentario.FechaCreacion.ToString("dd/MM/yyyy HH:mm")
+                                            @if (comentario.EstaEditado)
+                                            {
+                                                <span class="badge bg-secondary ms-2">Editado</span>
+                                            }
+                                        </small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Opciones del comentario (solo para el autor) -->
+                                @if (User.Identity.IsAuthenticated && comentario.UsuarioId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
+                                {
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" 
+                                                data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" asp-action="Editar" asp-route-id="@comentario.Id">
+                                                <i class="fas fa-edit"></i> Editar
+                                            </a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <form asp-action="Eliminar" method="post" class="d-inline" 
+                                                      onsubmit="return confirm('¿Estás seguro de eliminar este comentario?')">
+                                                    <input type="hidden" name="id" value="@comentario.Id" />
+                                                    <button type="submit" class="dropdown-item text-danger">
+                                                        <i class="fas fa-trash"></i> Eliminar
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Contenido del comentario -->
+                            <div class="comentario-contenido">
+                                <p class="mb-3">@comentario.Contenido</p>
+                            </div>
+
+                            <!-- Botón de responder -->
+                            <div class="comentario-acciones">
+                                <button class="btn btn-outline-primary btn-sm toggle-responder" 
+                                        data-comentario-id="@comentario.Id">
+                                    <i class="fas fa-reply"></i> Responder
+                                </button>
+                            </div>
+
+                            <!-- Formulario de respuesta (oculto por defecto) -->
+                            <div class="respuesta-form mt-3" id="respuesta-form-@comentario.Id" style="display: none;">
+                                <form asp-action="Responder" method="post">
+                                    <input type="hidden" name="comentarioPadreId" value="@comentario.Id" />
+                                    <div class="mb-2">
+                                        <textarea name="contenido" class="form-control" rows="3" 
+                                                  placeholder="Escribe tu respuesta..."></textarea>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-paper-plane"></i> Responder
+                                        </button>
+                                        <button type="button" class="btn btn-secondary btn-sm cancel-responder">
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Respuestas existentes -->
+                            @if (comentario.Respuestas.Any())
+                            {
+                                <div class="respuestas mt-4">
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="fas fa-comments"></i> 
+                                        Respuestas (@comentario.Respuestas.Count)
+                                    </h6>
+                                    
+                                    @foreach (var respuesta in comentario.Respuestas.OrderBy(r => r.FechaCreacion))
+                                    {
+                                        <div class="card bg-light mb-2 ms-4">
+                                            <div class="card-body py-3">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <div class="avatar-circle-small me-2">
+                                                            <i class="fas fa-user"></i>
+                                                        </div>
+                                                        <div>
+                                                            <strong class="me-2">@respuesta.NombreAutor</strong>
+                                                            <small class="text-muted">
+                                                                @respuesta.FechaCreacion.ToString("dd/MM/yyyy HH:mm")
+                                                                @if (respuesta.EstaEditado)
+                                                                {
+                                                                    <span class="badge bg-secondary">Editado</span>
+                                                                }
+                                                            </small>
+                                                        </div>
+                                                    </div>
+
+                                                    @if (User.Identity.IsAuthenticated && respuesta.UsuarioId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
+                                                    {
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" 
+                                                                    data-bs-toggle="dropdown">
+                                                                <i class="fas fa-ellipsis-v"></i>
+                                                            </button>
+                                                            <ul class="dropdown-menu">
+                                                                <li><a class="dropdown-item" asp-action="Editar" asp-route-id="@respuesta.Id">
+                                                                    <i class="fas fa-edit"></i> Editar
+                                                                </a></li>
+                                                                <li><hr class="dropdown-divider"></li>
+                                                                <li>
+                                                                    <form asp-action="Eliminar" method="post" class="d-inline"
+                                                                          onsubmit="return confirm('¿Estás seguro de eliminar esta respuesta?')">
+                                                                        <input type="hidden" name="id" value="@respuesta.Id" />
+                                                                        <button type="submit" class="dropdown-item text-danger">
+                                                                            <i class="fas fa-trash"></i> Eliminar
+                                                                        </button>
+                                                                    </form>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <p class="mb-0">@respuesta.Contenido</p>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">¡Sé el primero en comentar!</h4>
+                    <p class="text-muted">Aún no hay comentarios. Comparte tu opinión y comienza la conversación.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        .comentario-card {
+            border-left: 4px solid #007bff;
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .comentario-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .avatar-circle {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .avatar-circle-small {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(45deg, #6c757d, #495057);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        .respuestas {
+            border-left: 3px solid #e9ecef;
+            padding-left: 1rem;
+        }
+
+        .comentario-contenido {
+            line-height: 1.6;
+        }
+    </style>
+
+    <script>
+        // JavaScript para manejar formularios de respuesta
+        document.addEventListener('DOMContentLoaded', function() {
+            // Manejar botones de responder
+            document.querySelectorAll('.toggle-responder').forEach(button => {
+                button.addEventListener('click', function() {
+                    const comentarioId = this.getAttribute('data-comentario-id');
+                    const form = document.getElementById(`respuesta-form-${comentarioId}`);
+                    
+                    if (form.style.display === 'none') {
+                        form.style.display = 'block';
+                        this.innerHTML = '<i class="fas fa-times"></i> Cancelar';
+                        this.classList.remove('btn-outline-primary');
+                        this.classList.add('btn-outline-secondary');
+                    } else {
+                        form.style.display = 'none';
+                        this.innerHTML = '<i class="fas fa-reply"></i> Responder';
+                        this.classList.remove('btn-outline-secondary');
+                        this.classList.add('btn-outline-primary');
+                    }
+                });
+            });
+
+            // Manejar botones de cancelar respuesta
+            document.querySelectorAll('.cancel-responder').forEach(button => {
+                button.addEventListener('click', function() {
+                    const form = this.closest('.respuesta-form');
+                    const comentarioId = form.id.split('-')[2];
+                    const toggleButton = document.querySelector(`[data-comentario-id="${comentarioId}"]`);
+                    
+                    form.style.display = 'none';
+                    toggleButton.innerHTML = '<i class="fas fa-reply"></i> Responder';
+                    toggleButton.classList.remove('btn-outline-secondary');
+                    toggleButton.classList.add('btn-outline-primary');
+                    
+                    // Limpiar el textarea
+                    form.querySelector('textarea').value = '';
+                });
+            });
+        });
+    </script>
+}

@@ -273,4 +273,4 @@ C:\Users\Carlos\Documents\Grupo-Negro\obj\Debug\net9.0\refint\Grupo-negro.dll
 C:\Users\Carlos\Documents\Grupo-Negro\obj\Debug\net9.0\Grupo-negro.pdb
 C:\Users\rs_va\OneDrive\Desktop\Grupo-negro\obj\Debug\net9.0\compressed\xhvbjngd69-ssjlvx4mp1.gz
 C:\Users\rs_va\OneDrive\Desktop\Grupo-negro\obj\Debug\net9.0\compressed\s1s5pgi7oe-dn4ul178yo.gz
-C:\Users\rs_va\OneDrive\Desktop\Grupo-negro\obj\Debug\net9.0\compressed\xhexnf9cgg-wg1sj7ajt3.gz
+C:\Users\rs_va\OneDrive\Desktop\Grupo-negro\obj\Debug\net9.0\compressed\xhexnf9cgg-hxztzyr6jl.gz
