@@ -20,8 +20,15 @@ RUN dotnet publish "Grupo-negro.csproj" -c Release -o /app/publish /p:UseAppHost
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
 
+# Crear el directorio para la base de datos con permisos correctos
+RUN mkdir -p /data && chmod 777 /data
+
 # Copiar la aplicación publicada
 COPY --from=publish /app/publish .
+
+# Copiar el script de inicio
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
 
 # Exponer el puerto que usará la aplicación
 EXPOSE 8080
@@ -30,5 +37,5 @@ EXPOSE 8080
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ASPNETCORE_URLS=http://+:8080
 
-# Comando para iniciar la aplicación
-ENTRYPOINT ["dotnet", "Grupo-negro.dll"]
+# Comando para iniciar la aplicación usando el script
+ENTRYPOINT ["/app/start.sh"]

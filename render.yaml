@@ -17,13 +17,15 @@ services:
         value: http://+:8080
       - key: ConnectionStrings__DefaultConnection
         value: Data Source=/data/GrupoNegro.db
+      - key: DOTNET_SYSTEM_GLOBALIZATION_INVARIANT
+        value: false
     
     # Configuración de salud
     healthCheckPath: /
     
     # Disco persistente para la base de datos SQLite
     disk:
-      name: database
+      name: grupo-negro-database
       mountPath: /data
       sizeGB: 1
 

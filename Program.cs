@@ -82,6 +82,42 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+// Aplicar migraciones automáticamente en producción
+if (app.Environment.IsProduction())
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        try
+        {
+            var context = services.GetRequiredService<ApplicationDbContext>();
+            
+            // Asegurar que el directorio de la base de datos existe
+            var connectionString = app.Configuration.GetConnectionString("DefaultConnection");
+            if (!string.IsNullOrEmpty(connectionString) && connectionString.Contains("Data Source="))
+            {
+                var dbPath = connectionString.Split("Data Source=")[1].Split(';')[0];
+                var dbDirectory = Path.GetDirectoryName(dbPath);
+                if (!string.IsNullOrEmpty(dbDirectory) && !Directory.Exists(dbDirectory))
+                {
+                    Directory.CreateDirectory(dbDirectory);
+                    Console.WriteLine($"Directorio de base de datos creado: {dbDirectory}");
+                }
+            }
+            
+            // Aplicar migraciones pendientes
+            Console.WriteLine("Aplicando migraciones de base de datos...");
+            context.Database.Migrate();
+            Console.WriteLine("Migraciones aplicadas exitosamente.");
+        }
+        catch (Exception ex)
+        {
+            var logger = services.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "Un error ocurrió al aplicar las migraciones.");
+        }
+    }
+}
+
 // Inicializar datos (roles y usuario admin)
 await Grupo_negro.Services.InicializacionService.InicializarDatos(app.Services);
 
