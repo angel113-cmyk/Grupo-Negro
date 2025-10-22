@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\rs_va\\OneDrive\\Desktop\\Grupo-negro\\Grupo-negro.csproj": {}
+    "C:\\Users\\User\\Downloads\\Apuesta\\Grupo-Negro\\Grupo-negro.csproj": {}
   },
   "projects": {
-    "C:\\Users\\rs_va\\OneDrive\\Desktop\\Grupo-negro\\Grupo-negro.csproj": {
+    "C:\\Users\\User\\Downloads\\Apuesta\\Grupo-Negro\\Grupo-negro.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\rs_va\\OneDrive\\Desktop\\Grupo-negro\\Grupo-negro.csproj",
+        "projectUniqueName": "C:\\Users\\User\\Downloads\\Apuesta\\Grupo-Negro\\Grupo-negro.csproj",
         "projectName": "Grupo-negro",
-        "projectPath": "C:\\Users\\rs_va\\OneDrive\\Desktop\\Grupo-negro\\Grupo-negro.csproj",
-        "packagesPath": "C:\\Users\\rs_va\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\rs_va\\OneDrive\\Desktop\\Grupo-negro\\obj\\",
+        "projectPath": "C:\\Users\\User\\Downloads\\Apuesta\\Grupo-Negro\\Grupo-negro.csproj",
+        "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\User\\Downloads\\Apuesta\\Grupo-Negro\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\rs_va\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
@@ -44,9 +44,23 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
+            "BCrypt.Net-Next": {
+              "target": "Package",
+              "version": "[4.0.3, )"
+            },
             "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
               "target": "Package",
               "version": "[9.0.9, )"
+            },
+            "Microsoft.AspNetCore.Session": {
+              "target": "Package",
+              "version": "[2.3.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.10, )"
             },
             "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
@@ -54,13 +68,13 @@
             },
             "Microsoft.EntityFrameworkCore.Sqlite": {
               "target": "Package",
-              "version": "[9.0.9, )"
+              "version": "[9.0.10, )"
             },
             "Microsoft.EntityFrameworkCore.Tools": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
-              "version": "[9.0.9, )"
+              "version": "[9.0.10, )"
             }
           },
           "imports": [
