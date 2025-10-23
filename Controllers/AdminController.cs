@@ -137,11 +137,132 @@ namespace Grupo_negro.Controllers
         // GET: Admin/Usuarios
         public async Task<IActionResult> Usuarios()
         {
+            var usuarios = await _userManager.Users.ToListAsync();
+            usuarios = usuarios.OrderByDescending(u => u.Saldo).ToList();
+
+            return View(usuarios);
+        }
+
+        // GET: Admin/UsuariosNuevos
+        public async Task<IActionResult> UsuariosNuevos()
+        {
+            var primerDiaMes = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             var usuarios = await _userManager.Users
-                .OrderByDescending(u => u.Saldo)
+                .Where(u => u.FechaRegistro >= primerDiaMes)
+                .OrderByDescending(u => u.FechaRegistro)
+                .ToListAsync();
+
+            ViewBag.TotalUsuariosNuevos = usuarios.Count;
+            return View(usuarios);
+        }
+
+        // GET: Admin/DetalleUsuario/{id}
+        public async Task<IActionResult> DetalleUsuario(string id)
+        {
+            var usuario = await _userManager.Users
+                .Include(u => u.Bonos)
+                    .ThenInclude(b => b.AsignadoPor)
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (usuario == null)
+            {
+                TempData["Error"] = "Usuario no encontrado.";
+                return RedirectToAction(nameof(Usuarios));
+            }
+
+            var apuestas = await _context.Apuestas
+                .Include(a => a.Partido)
+                    .ThenInclude(p => p.EquipoLocal)
+                .Include(a => a.Partido)
+                    .ThenInclude(p => p.EquipoVisitante)
+                .Where(a => a.UsuarioId == id)
+                .OrderByDescending(a => a.FechaApuesta)
+                .Take(10)
+                .ToListAsync();
+
+            ViewBag.Apuestas = apuestas;
+            return View(usuario);
+        }
+
+        // GET: Admin/AsignarBonos
+        public async Task<IActionResult> AsignarBonos()
+        {
+            var usuarios = await _userManager.Users
+                .OrderBy(u => u.Nombres)
+                .ThenBy(u => u.Apellidos)
                 .ToListAsync();
 
             return View(usuarios);
+        }
+
+        // POST: Admin/AsignarBono
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AsignarBono(string usuarioId, string concepto, decimal monto)
+        {
+            var usuario = await _userManager.FindByIdAsync(usuarioId);
+            if (usuario == null)
+            {
+                TempData["Error"] = "Usuario no encontrado.";
+                return RedirectToAction(nameof(AsignarBonos));
+            }
+
+            var adminUser = await _userManager.GetUserAsync(User);
+            if (adminUser == null)
+            {
+                TempData["Error"] = "Error al obtener el administrador.";
+                return RedirectToAction(nameof(AsignarBonos));
+            }
+
+            // Crear el bono
+            var bono = new BonoUsuario
+            {
+                UsuarioId = usuarioId,
+                Concepto = concepto,
+                Monto = monto,
+                AsignadoPorId = adminUser.Id,
+                FechaAsignacion = DateTime.Now,
+                Aplicado = true
+            };
+
+            // Agregar el monto al saldo del usuario
+            usuario.Saldo += monto;
+
+            _context.BonosUsuarios.Add(bono);
+            await _userManager.UpdateAsync(usuario);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"Bono de ${monto:N2} asignado exitosamente a {usuario.NombreCompleto}.";
+            return RedirectToAction(nameof(AsignarBonos));
+        }
+
+        // GET: Admin/CrearPartido
+        public async Task<IActionResult> CrearPartido()
+        {
+            ViewBag.Ligas = await _context.Ligas.OrderBy(l => l.Nombre).ToListAsync();
+            ViewBag.Equipos = await _context.Equipos.OrderBy(e => e.Nombre).ToListAsync();
+            return View();
+        }
+
+        // POST: Admin/CrearPartido
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CrearPartido(Partido partido)
+        {
+            if (partido.EquipoLocalId == partido.EquipoVisitanteId)
+            {
+                TempData["Error"] = "El equipo local y visitante no pueden ser el mismo.";
+                ViewBag.Ligas = await _context.Ligas.OrderBy(l => l.Nombre).ToListAsync();
+                ViewBag.Equipos = await _context.Equipos.OrderBy(e => e.Nombre).ToListAsync();
+                return View(partido);
+            }
+
+            partido.Estado = EstadoPartido.Programado;
+            _context.Partidos.Add(partido);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Partido creado exitosamente.";
+            return RedirectToAction(nameof(Partidos));
         }
     }
 }

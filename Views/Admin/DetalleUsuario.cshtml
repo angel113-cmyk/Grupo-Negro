@@ -1,0 +1,206 @@
+@model ApplicationUser
+@{
+    ViewData["Title"] = "Detalle de Usuario";
+    var apuestas = ViewBag.Apuestas as List<Apuesta>;
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2><i class="fas fa-user-circle"></i> Detalle de Usuario</h2>
+                <a href="@Url.Action("UsuariosNuevos", "Admin")" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información Personal -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-id-card"></i> Información Personal</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr>
+                            <th width="40%">DNI:</th>
+                            <td><strong>@(Model.DNI ?? "No registrado")</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Nombre Completo:</th>
+                            <td>@Model.NombreCompleto</td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td>@Model.Email</td>
+                        </tr>
+                        <tr>
+                            <th>Celular:</th>
+                            <td>@(Model.Celular ?? "No registrado")</td>
+                        </tr>
+                        <tr>
+                            <th>Negocio:</th>
+                            <td>@(Model.Negocio ?? "No registrado")</td>
+                        </tr>
+                        <tr>
+                            <th>Fecha Registro:</th>
+                            <td>@Model.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</td>
+                        </tr>
+                        <tr>
+                            <th>Saldo Actual:</th>
+                            <td>
+                                <span class="badge bg-success fs-5">
+                                    $@Model.Saldo.ToString("N2")
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bonos Recibidos -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5><i class="fas fa-gift"></i> Historial de Bonos</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Bonos != null && Model.Bonos.Any())
+                    {
+                        <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Concepto</th>
+                                        <th>Monto</th>
+                                        <th>Asignado Por</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var bono in Model.Bonos.OrderByDescending(b => b.FechaAsignacion))
+                                    {
+                                        <tr>
+                                            <td>@bono.FechaAsignacion.ToString("dd/MM/yyyy")</td>
+                                            <td>@bono.Concepto</td>
+                                            <td>
+                                                <span class="badge bg-success">
+                                                    +$@bono.Monto.ToString("N2")
+                                                </span>
+                                            </td>
+                                            <td>@bono.AsignadoPor.NombreCompleto</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <hr>
+                        <div class="text-end">
+                            <strong>Total en Bonos:</strong>
+                            <span class="badge bg-info fs-6">
+                                $@Model.Bonos.Sum(b => b.Monto).ToString("N2")
+                            </span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> No se han asignado bonos a este usuario.
+                        </div>
+                    }
+                    
+                    <div class="mt-3">
+                        <a href="@Url.Action("AsignarBonos", "Admin")#usuario-@Model.Id" class="btn btn-warning w-100">
+                            <i class="fas fa-plus"></i> Asignar Nuevo Bono
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Apuestas Recientes -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="fas fa-dice"></i> Últimas 10 Apuestas</h5>
+                </div>
+                <div class="card-body">
+                    @if (apuestas != null && apuestas.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Partido</th>
+                                        <th>Tipo</th>
+                                        <th>Monto</th>
+                                        <th>Cuota</th>
+                                        <th>Posible Ganancia</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var apuesta in apuestas)
+                                    {
+                                        <tr>
+                                            <td>@apuesta.FechaApuesta.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                <small>
+                                                    @apuesta.Partido.EquipoLocal.Nombre vs @apuesta.Partido.EquipoVisitante.Nombre
+                                                </small>
+                                            </td>
+                                            <td>
+                                                @switch (apuesta.TipoApuesta)
+                                                {
+                                                    case TipoApuesta.GanaLocal:
+                                                        <span class="badge bg-primary">Local</span>
+                                                        break;
+                                                    case TipoApuesta.GanaVisitante:
+                                                        <span class="badge bg-danger">Visitante</span>
+                                                        break;
+                                                    case TipoApuesta.Empate:
+                                                        <span class="badge bg-secondary">Empate</span>
+                                                        break;
+                                                }
+                                            </td>
+                                            <td>$@apuesta.MontoApostado.ToString("N2")</td>
+                                            <td>@apuesta.CuotaAplicada.ToString("F2")</td>
+                                            <td>$@apuesta.PosibleGanancia.ToString("N2")</td>
+                                            <td>
+                                                @switch (apuesta.Estado)
+                                                {
+                                                    case EstadoApuesta.Activa:
+                                                        <span class="badge bg-warning">Activa</span>
+                                                        break;
+                                                    case EstadoApuesta.Ganada:
+                                                        <span class="badge bg-success">Ganada</span>
+                                                        break;
+                                                    case EstadoApuesta.Perdida:
+                                                        <span class="badge bg-danger">Perdida</span>
+                                                        break;
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> El usuario no ha realizado apuestas aún.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

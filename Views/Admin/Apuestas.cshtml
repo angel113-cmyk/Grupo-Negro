@@ -1,0 +1,207 @@
+@model IEnumerable<Apuesta>
+@{
+    ViewData["Title"] = "Gestionar Apuestas";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h2><i class="fas fa-list"></i> Gestionar Apuestas</h2>
+                    <p class="text-muted">Todas las apuestas del sistema</p>
+                </div>
+                <a href="@Url.Action("Index", "Admin")" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver al Panel
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h4>@Model.Count(a => a.Estado == EstadoApuesta.Activa)</h4>
+                    <p class="mb-0">Apuestas Activas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4>@Model.Count(a => a.Estado == EstadoApuesta.Ganada)</h4>
+                    <p class="mb-0">Apuestas Ganadas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h4>@Model.Count(a => a.Estado == EstadoApuesta.Perdida)</h4>
+                    <p class="mb-0">Apuestas Perdidas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h4>$@Model.Sum(a => a.MontoApostado).ToString("N2")</h4>
+                    <p class="mb-0">Total Apostado</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <input type="text" id="searchApuesta" class="form-control" placeholder="Buscar por usuario o partido...">
+        </div>
+        <div class="col-md-3">
+            <select id="filterEstado" class="form-select">
+                <option value="">Todos los estados</option>
+                <option value="Activa">Activas</option>
+                <option value="Ganada">Ganadas</option>
+                <option value="Perdida">Perdidas</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Tabla de apuestas -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="tablaApuestas">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Usuario</th>
+                                        <th>Partido</th>
+                                        <th>Liga</th>
+                                        <th>Tipo</th>
+                                        <th>Monto</th>
+                                        <th>Cuota</th>
+                                        <th>Posible Ganancia</th>
+                                        <th>Fecha</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var apuesta in Model)
+                                    {
+                                        <tr class="apuesta-row" data-estado="@apuesta.Estado">
+                                            <td><strong>#@apuesta.Id</strong></td>
+                                            <td>
+                                                <i class="fas fa-user"></i> @apuesta.Usuario.NombreCompleto
+                                                <br>
+                                                <small class="text-muted">@apuesta.Usuario.Email</small>
+                                            </td>
+                                            <td>
+                                                <strong>@apuesta.Partido.EquipoLocal.Nombre</strong> vs <strong>@apuesta.Partido.EquipoVisitante.Nombre</strong>
+                                                <br>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-calendar"></i> @apuesta.Partido.FechaHora.ToString("dd/MM/yyyy HH:mm")
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">@apuesta.Partido.Liga.Nombre</span>
+                                            </td>
+                                            <td>
+                                                @switch (apuesta.TipoApuesta)
+                                                {
+                                                    case TipoApuesta.GanaLocal:
+                                                        <span class="badge bg-primary">Gana Local</span>
+                                                        break;
+                                                    case TipoApuesta.GanaVisitante:
+                                                        <span class="badge bg-danger">Gana Visitante</span>
+                                                        break;
+                                                    case TipoApuesta.Empate:
+                                                        <span class="badge bg-secondary">Empate</span>
+                                                        break;
+                                                }
+                                            </td>
+                                            <td><strong>$@apuesta.MontoApostado.ToString("N2")</strong></td>
+                                            <td>@apuesta.CuotaAplicada.ToString("F2")</td>
+                                            <td><strong class="text-success">$@apuesta.PosibleGanancia.ToString("N2")</strong></td>
+                                            <td>@apuesta.FechaApuesta.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>
+                                                @switch (apuesta.Estado)
+                                                {
+                                                    case EstadoApuesta.Activa:
+                                                        <span class="badge bg-warning text-dark">
+                                                            <i class="fas fa-clock"></i> Activa
+                                                        </span>
+                                                        break;
+                                                    case EstadoApuesta.Ganada:
+                                                        <span class="badge bg-success">
+                                                            <i class="fas fa-check"></i> Ganada
+                                                        </span>
+                                                        break;
+                                                    case EstadoApuesta.Perdida:
+                                                        <span class="badge bg-danger">
+                                                            <i class="fas fa-times"></i> Perdida
+                                                        </span>
+                                                        break;
+                                                    case EstadoApuesta.Cancelada:
+                                                        <span class="badge bg-secondary">
+                                                            <i class="fas fa-ban"></i> Cancelada
+                                                        </span>
+                                                        break;
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> No hay apuestas registradas en el sistema.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Búsqueda en tiempo real
+        document.getElementById('searchApuesta').addEventListener('keyup', function() {
+            filterTable();
+        });
+
+        // Filtro por estado
+        document.getElementById('filterEstado').addEventListener('change', function() {
+            filterTable();
+        });
+
+        function filterTable() {
+            var searchText = document.getElementById('searchApuesta').value.toLowerCase();
+            var filterEstado = document.getElementById('filterEstado').value;
+            var rows = document.querySelectorAll('.apuesta-row');
+
+            rows.forEach(function(row) {
+                var text = row.textContent.toLowerCase();
+                var estado = row.getAttribute('data-estado');
+                var showBySearch = searchText === '' || text.includes(searchText);
+                var showByEstado = filterEstado === '' || estado === filterEstado;
+
+                if (showBySearch && showByEstado) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+}

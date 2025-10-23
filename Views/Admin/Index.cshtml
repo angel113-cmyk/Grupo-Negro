@@ -83,23 +83,49 @@
                     <h5><i class="fas fa-tools"></i> Acciones Rápidas</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <a href="@Url.Action("Apuestas", "Admin")" class="btn btn-primary btn-lg w-100">
-                                <i class="fas fa-list"></i><br>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Apuestas", "Admin")" class="btn btn-primary btn-lg w-100 h-100">
+                                <i class="fas fa-list fa-2x"></i><br>
                                 Gestionar Apuestas
                             </a>
                         </div>
-                        <div class="col-md-4">
-                            <a href="@Url.Action("Partidos", "Admin")" class="btn btn-success btn-lg w-100">
-                                <i class="fas fa-futbol"></i><br>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Partidos", "Admin")" class="btn btn-success btn-lg w-100 h-100">
+                                <i class="fas fa-futbol fa-2x"></i><br>
                                 Finalizar Partidos
                             </a>
                         </div>
-                        <div class="col-md-4">
-                            <a href="@Url.Action("Usuarios", "Admin")" class="btn btn-info btn-lg w-100">
-                                <i class="fas fa-users"></i><br>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Usuarios", "Admin")" class="btn btn-info btn-lg w-100 h-100">
+                                <i class="fas fa-users fa-2x"></i><br>
                                 Ver Usuarios
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("CrearPartido", "Admin")" class="btn btn-dark btn-lg w-100 h-100">
+                                <i class="fas fa-plus-circle fa-2x"></i><br>
+                                Crear Partido
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-4">
+                            <a href="@Url.Action("UsuariosNuevos", "Admin")" class="btn btn-warning btn-lg w-100 h-100">
+                                <i class="fas fa-user-plus fa-2x"></i><br>
+                                Usuarios Nuevos
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="@Url.Action("AsignarBonos", "Admin")" class="btn btn-secondary btn-lg w-100 h-100">
+                                <i class="fas fa-gift fa-2x"></i><br>
+                                Asignar Bonos
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="@Url.Action("Index", "Comentarios")" class="btn btn-outline-primary btn-lg w-100 h-100">
+                                <i class="fas fa-comments fa-2x"></i><br>
+                                Ver Comentarios
                             </a>
                         </div>
                     </div>

@@ -37,6 +37,7 @@ namespace Grupo_negro.Services
                     Celular = "+51 999 999 999",
                     Negocio = "APUESTA KONGNOSTROS ADMIN",
                     Saldo = 10000.00m, // Saldo inicial para admin
+                    FechaRegistro = DateTime.Now,
                     EmailConfirmed = true
                 };
 

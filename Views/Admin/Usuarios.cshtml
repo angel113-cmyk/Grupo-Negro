@@ -1,0 +1,318 @@
+@model IEnumerable<ApplicationUser>
+@{
+    ViewData["Title"] = "Usuarios";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h2><i class="fas fa-users"></i> Todos los Usuarios</h2>
+                    <p class="text-muted">Total de usuarios: @Model.Count()</p>
+                </div>
+                <a href="@Url.Action("Index", "Admin")" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver al Panel
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h4>@Model.Count()</h4>
+                    <p class="mb-0">Total Usuarios</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4>$@Model.Sum(u => u.Saldo).ToString("N2")</h4>
+                    <p class="mb-0">Saldo Total</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h4>$@(Model.Any() ? Model.Average(u => u.Saldo).ToString("N2") : "0.00")</h4>
+                    <p class="mb-0">Saldo Promedio</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h4>@Model.Count(u => u.DNI != null)</h4>
+                    <p class="mb-0">Con DNI Registrado</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <input type="text" id="searchUsuario" class="form-control" placeholder="Buscar por nombre, email o DNI...">
+        </div>
+        <div class="col-md-3">
+            <select id="sortBy" class="form-select">
+                <option value="saldo">Ordenar por Saldo (mayor a menor)</option>
+                <option value="nombre">Ordenar por Nombre</option>
+                <option value="fecha">Ordenar por Fecha de Registro</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Tabla de usuarios -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="tablaUsuarios">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>DNI</th>
+                                        <th>Nombre Completo</th>
+                                        <th>Email</th>
+                                        <th>Celular</th>
+                                        <th>Negocio</th>
+                                        <th>Saldo</th>
+                                        <th>Fecha Registro</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyUsuarios">
+                                    @foreach (var usuario in Model)
+                                    {
+                                        <tr class="usuario-row" 
+                                            data-nombre="@usuario.NombreCompleto.ToLower()" 
+                                            data-email="@usuario.Email.ToLower()" 
+                                            data-dni="@(usuario.DNI ?? "")"
+                                            data-saldo="@usuario.Saldo"
+                                            data-fecha="@usuario.FechaRegistro.Ticks">
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(usuario.DNI))
+                                                {
+                                                    <strong>@usuario.DNI</strong>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Sin DNI</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-user"></i> @usuario.NombreCompleto
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-envelope"></i> @usuario.Email
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(usuario.Celular))
+                                                {
+                                                    <span>@usuario.Celular</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Sin celular</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(usuario.Negocio))
+                                                {
+                                                    <span>@usuario.Negocio</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Sin negocio</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success fs-6">
+                                                    $@usuario.Saldo.ToString("N2")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @usuario.FechaRegistro.ToString("dd/MM/yyyy")
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("DetalleUsuario", "Admin", new { id = usuario.Id })" 
+                                                       class="btn btn-sm btn-primary" title="Ver Detalles">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-warning" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#modalBono"
+                                                            data-usuario-id="@usuario.Id"
+                                                            data-usuario-nombre="@usuario.NombreCompleto"
+                                                            title="Asignar Bono">
+                                                        <i class="fas fa-gift"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> No hay usuarios registrados.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para asignar bono (reutilizado de AsignarBonos) -->
+<div class="modal fade" id="modalBono" tabindex="-1" aria-labelledby="modalBonoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-controller="Admin" asp-action="AsignarBono" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="modalBonoLabel">
+                        <i class="fas fa-gift"></i> Asignar Bono
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="usuarioId" name="usuarioId" />
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Usuario:</strong></label>
+                        <p id="usuarioNombre" class="form-control-plaintext bg-light p-2 rounded"></p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="concepto" class="form-label">Concepto del Bono:</label>
+                        <select class="form-select" id="concepto" name="concepto" required>
+                            <option value="">Seleccionar concepto...</option>
+                            <option value="Bono de Bienvenida">Bono de Bienvenida</option>
+                            <option value="Bono por Recarga">Bono por Recarga</option>
+                            <option value="Bono Promocional">Bono Promocional</option>
+                            <option value="Compensación">Compensación</option>
+                            <option value="Bono Especial">Bono Especial</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3" id="otroConceptoDiv" style="display: none;">
+                        <label for="otroConcepto" class="form-label">Especificar Concepto:</label>
+                        <input type="text" class="form-control" id="otroConcepto" maxlength="100" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="monto" class="form-label">Monto del Bono:</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="monto" name="monto" 
+                                   min="0.01" step="0.01" required placeholder="0.00" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-check"></i> Asignar Bono
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Modal de asignar bono
+        var modalBono = document.getElementById('modalBono');
+        modalBono.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var usuarioId = button.getAttribute('data-usuario-id');
+            var usuarioNombre = button.getAttribute('data-usuario-nombre');
+            
+            document.getElementById('usuarioId').value = usuarioId;
+            document.getElementById('usuarioNombre').textContent = usuarioNombre;
+            document.getElementById('concepto').value = '';
+            document.getElementById('monto').value = '';
+            document.getElementById('otroConceptoDiv').style.display = 'none';
+        });
+
+        // Mostrar campo de concepto personalizado
+        document.getElementById('concepto').addEventListener('change', function() {
+            var otroDiv = document.getElementById('otroConceptoDiv');
+            if (this.value === 'Otro') {
+                otroDiv.style.display = 'block';
+            } else {
+                otroDiv.style.display = 'none';
+            }
+        });
+
+        // Usar el concepto personalizado si se selecciona "Otro"
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var concepto = document.getElementById('concepto');
+            if (concepto.value === 'Otro') {
+                var otroConcepto = document.getElementById('otroConcepto').value;
+                if (otroConcepto.trim() === '') {
+                    e.preventDefault();
+                    alert('Por favor especifica el concepto del bono.');
+                    return false;
+                }
+                concepto.value = otroConcepto;
+            }
+        });
+
+        // Búsqueda de usuarios
+        document.getElementById('searchUsuario').addEventListener('keyup', function() {
+            var searchText = this.value.toLowerCase();
+            var rows = document.querySelectorAll('.usuario-row');
+            
+            rows.forEach(function(row) {
+                var nombre = row.getAttribute('data-nombre');
+                var email = row.getAttribute('data-email');
+                var dni = row.getAttribute('data-dni');
+                
+                if (nombre.includes(searchText) || email.includes(searchText) || dni.includes(searchText)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Ordenamiento
+        document.getElementById('sortBy').addEventListener('change', function() {
+            var sortType = this.value;
+            var tbody = document.getElementById('tbodyUsuarios');
+            var rows = Array.from(tbody.querySelectorAll('.usuario-row'));
+            
+            rows.sort(function(a, b) {
+                if (sortType === 'saldo') {
+                    return parseFloat(b.getAttribute('data-saldo')) - parseFloat(a.getAttribute('data-saldo'));
+                } else if (sortType === 'nombre') {
+                    return a.getAttribute('data-nombre').localeCompare(b.getAttribute('data-nombre'));
+                } else if (sortType === 'fecha') {
+                    return parseInt(b.getAttribute('data-fecha')) - parseInt(a.getAttribute('data-fecha'));
+                }
+            });
+            
+            rows.forEach(function(row) {
+                tbody.appendChild(row);
+            });
+        });
+    </script>
+}

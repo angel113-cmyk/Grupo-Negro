@@ -1,0 +1,321 @@
+@model IEnumerable<Partido>
+@{
+    ViewData["Title"] = "Finalizar Partidos";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h2><i class="fas fa-futbol"></i> Gestionar Partidos</h2>
+                    <p class="text-muted">Finaliza partidos y procesa las apuestas automáticamente</p>
+                </div>
+                <div>
+                    <a href="@Url.Action("CrearPartido", "Admin")" class="btn btn-success me-2">
+                        <i class="fas fa-plus"></i> Crear Partido
+                    </a>
+                    <a href="@Url.Action("Index", "Admin")" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h4>@Model.Count(p => p.Estado == EstadoPartido.Programado)</h4>
+                    <p class="mb-0">Programados</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h4>@Model.Count(p => p.Estado == EstadoPartido.EnJuego)</h4>
+                    <p class="mb-0">En Juego</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4>@Model.Count(p => p.Estado == EstadoPartido.Finalizado)</h4>
+                    <p class="mb-0">Finalizados</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h4>@Model.Sum(p => p.Apuestas.Count)</h4>
+                    <p class="mb-0">Total Apuestas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <input type="text" id="searchPartido" class="form-control" placeholder="Buscar partido o liga...">
+        </div>
+        <div class="col-md-3">
+            <select id="filterEstado" class="form-select">
+                <option value="">Todos los estados</option>
+                <option value="Programado">Programados</option>
+                <option value="EnJuego">En Juego</option>
+                <option value="Finalizado">Finalizados</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Partidos -->
+    <div class="row">
+        @if (Model.Any())
+        {
+            @foreach (var partido in Model)
+            {
+                <div class="col-md-6 mb-4 partido-card" data-estado="@partido.Estado">
+                    <div class="card @(partido.Estado == EstadoPartido.Finalizado ? "border-success" : partido.Estado == EstadoPartido.EnJuego ? "border-warning" : "")">
+                        <div class="card-header @(partido.Estado == EstadoPartido.Finalizado ? "bg-success text-white" : partido.Estado == EstadoPartido.EnJuego ? "bg-warning" : "bg-primary text-white")">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-trophy"></i> <strong>@partido.Liga.Nombre</strong>
+                                </div>
+                                <div>
+                                    @switch (partido.Estado)
+                                    {
+                                        case EstadoPartido.Programado:
+                                            <span class="badge bg-light text-dark">
+                                                <i class="fas fa-clock"></i> Programado
+                                            </span>
+                                            break;
+                                        case EstadoPartido.EnJuego:
+                                            <span class="badge bg-light text-dark">
+                                                <i class="fas fa-play"></i> En Juego
+                                            </span>
+                                            break;
+                                        case EstadoPartido.Finalizado:
+                                            <span class="badge bg-light text-dark">
+                                                <i class="fas fa-check"></i> Finalizado
+                                            </span>
+                                            break;
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- Equipos y resultado -->
+                            <div class="row text-center mb-3">
+                                <div class="col-5">
+                                    <h4>@partido.EquipoLocal.Nombre</h4>
+                                    @if (partido.Estado == EstadoPartido.Finalizado)
+                                    {
+                                        <h2 class="text-primary">@partido.GolesLocal</h2>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted">Local</p>
+                                    }
+                                </div>
+                                <div class="col-2 d-flex align-items-center justify-content-center">
+                                    <h3>VS</h3>
+                                </div>
+                                <div class="col-5">
+                                    <h4>@partido.EquipoVisitante.Nombre</h4>
+                                    @if (partido.Estado == EstadoPartido.Finalizado)
+                                    {
+                                        <h2 class="text-danger">@partido.GolesVisitante</h2>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted">Visitante</p>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Información del partido -->
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <p class="mb-1">
+                                        <i class="fas fa-calendar"></i>
+                                        <strong>Fecha:</strong> @partido.FechaHora.ToString("dd/MM/yyyy HH:mm")
+                                    </p>
+                                    <p class="mb-1">
+                                        <i class="fas fa-dice"></i>
+                                        <strong>Apuestas:</strong> @partido.Apuestas.Count
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Cuotas -->
+                            <div class="row mb-3">
+                                <div class="col-4 text-center">
+                                    <small class="text-muted">Cuota Local</small><br>
+                                    <strong>@partido.CuotaLocal.ToString("F2")</strong>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <small class="text-muted">Cuota Empate</small><br>
+                                    <strong>@partido.CuotaEmpate.ToString("F2")</strong>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <small class="text-muted">Cuota Visitante</small><br>
+                                    <strong>@partido.CuotaVisitante.ToString("F2")</strong>
+                                </div>
+                            </div>
+
+                            <!-- Botón para finalizar -->
+                            @if (partido.Estado != EstadoPartido.Finalizado)
+                            {
+                                <button type="button" class="btn btn-success w-100" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#modalFinalizar"
+                                        data-partido-id="@partido.Id"
+                                        data-partido-local="@partido.EquipoLocal.Nombre"
+                                        data-partido-visitante="@partido.EquipoVisitante.Nombre">
+                                    <i class="fas fa-flag-checkered"></i> Finalizar Partido
+                                </button>
+                            }
+                            else
+                            {
+                                <div class="alert alert-success mb-0">
+                                    <i class="fas fa-check-circle"></i> 
+                                    Partido finalizado. Se procesaron @partido.Apuestas.Count apuestas.
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No hay partidos registrados.
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal para finalizar partido -->
+<div class="modal fade" id="modalFinalizar" tabindex="-1" aria-labelledby="modalFinalizarLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="FinalizarPartido" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="modalFinalizarLabel">
+                        <i class="fas fa-flag-checkered"></i> Finalizar Partido
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="partidoId" name="id" />
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        Ingresa el resultado final del partido. Se procesarán automáticamente todas las apuestas.
+                    </div>
+
+                    <div class="mb-3 text-center">
+                        <h5 id="partidoNombres"></h5>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <label for="golesLocal" class="form-label">
+                                <strong>Goles Local:</strong>
+                            </label>
+                            <input type="number" class="form-control form-control-lg text-center" 
+                                   id="golesLocal" name="golesLocal" min="0" max="20" required />
+                        </div>
+                        <div class="col-6">
+                            <label for="golesVisitante" class="form-label">
+                                <strong>Goles Visitante:</strong>
+                            </label>
+                            <input type="number" class="form-control form-control-lg text-center" 
+                                   id="golesVisitante" name="golesVisitante" min="0" max="20" required />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> Finalizar y Procesar Apuestas
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Modal de finalizar partido
+        var modalFinalizar = document.getElementById('modalFinalizar');
+        modalFinalizar.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var partidoId = button.getAttribute('data-partido-id');
+            var equipoLocal = button.getAttribute('data-partido-local');
+            var equipoVisitante = button.getAttribute('data-partido-visitante');
+            
+            document.getElementById('partidoId').value = partidoId;
+            document.getElementById('partidoNombres').textContent = equipoLocal + ' vs ' + equipoVisitante;
+            document.getElementById('golesLocal').value = '';
+            document.getElementById('golesVisitante').value = '';
+        });
+
+        // Búsqueda y filtros
+        document.getElementById('searchPartido').addEventListener('keyup', function() {
+            filterPartidos();
+        });
+
+        document.getElementById('filterEstado').addEventListener('change', function() {
+            filterPartidos();
+        });
+
+        function filterPartidos() {
+            var searchText = document.getElementById('searchPartido').value.toLowerCase();
+            var filterEstado = document.getElementById('filterEstado').value;
+            var cards = document.querySelectorAll('.partido-card');
+
+            cards.forEach(function(card) {
+                var text = card.textContent.toLowerCase();
+                var estado = card.getAttribute('data-estado');
+                var showBySearch = searchText === '' || text.includes(searchText);
+                var showByEstado = filterEstado === '' || estado === filterEstado;
+
+                if (showBySearch && showByEstado) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+}

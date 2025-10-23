@@ -19,6 +19,7 @@ namespace Grupo_negro.Data
         public DbSet<ApuestaCombinada> ApuestasCombinadas { get; set; }
         public DbSet<DetalleApuestaCombinada> DetallesApuestasCombinadas { get; set; }
         public DbSet<Comentario> Comentarios { get; set; }
+        public DbSet<BonoUsuario> BonosUsuarios { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -93,6 +94,20 @@ namespace Grupo_negro.Data
                       .WithMany(c => c.Respuestas)
                       .HasForeignKey(c => c.ComentarioPadreId)
                       .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Configuración para BonoUsuario
+            builder.Entity<BonoUsuario>(entity =>
+            {
+                entity.HasOne(b => b.Usuario)
+                    .WithMany(u => u.Bonos)
+                    .HasForeignKey(b => b.UsuarioId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(b => b.AsignadoPor)
+                    .WithMany()
+                    .HasForeignKey(b => b.AsignadoPorId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

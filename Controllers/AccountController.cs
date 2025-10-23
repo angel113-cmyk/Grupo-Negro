@@ -94,7 +94,8 @@ namespace Grupo_negro.Controllers
                     Apellidos = model.Apellidos,
                     DNI = model.DNI,
                     Celular = model.Celular,
-                    Negocio = model.Negocio
+                    Negocio = model.Negocio,
+                    FechaRegistro = DateTime.Now
                 };
                 var result = await _userManager.CreateAsync(user, model.Password);
 

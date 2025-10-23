@@ -26,6 +26,11 @@ namespace Grupo_negro.Models
         [Column(TypeName = "decimal(10,2)")]
         public decimal Saldo { get; set; } = 0.00m;
 
+        public DateTime FechaRegistro { get; set; } = DateTime.Now;
+
+        // Relación con bonos
+        public ICollection<BonoUsuario> Bonos { get; set; } = new List<BonoUsuario>();
+
         public string NombreCompleto => $"{Nombres} {Apellidos}";
     }
 }

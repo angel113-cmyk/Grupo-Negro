@@ -1,0 +1,168 @@
+@model IEnumerable<ApplicationUser>
+@{
+    ViewData["Title"] = "Usuarios Nuevos";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h2><i class="fas fa-user-plus"></i> Usuarios Nuevos Este Mes</h2>
+                    <p class="text-muted">Total: @ViewBag.TotalUsuariosNuevos usuarios registrados en @DateTime.Now.ToString("MMMM yyyy")</p>
+                </div>
+                <a href="@Url.Action("Index", "Admin")" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver al Panel
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfica de registros por día -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-line"></i> Registros por Día</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartRegistros" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de usuarios -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-list"></i> Lista de Usuarios Nuevos</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>DNI</th>
+                                        <th>Nombre Completo</th>
+                                        <th>Email</th>
+                                        <th>Celular</th>
+                                        <th>Saldo</th>
+                                        <th>Fecha Registro</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var usuario in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@(usuario.DNI ?? "Sin DNI")</strong>
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-user"></i> @usuario.NombreCompleto
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-envelope"></i> @usuario.Email
+                                            </td>
+                                            <td>
+                                                @(usuario.Celular ?? "Sin celular")
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success">
+                                                    $@usuario.Saldo.ToString("N2")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-calendar"></i>
+                                                @usuario.FechaRegistro.ToString("dd/MM/yyyy HH:mm")
+                                            </td>
+                                            <td>
+                                                <a href="@Url.Action("DetalleUsuario", "Admin", new { id = usuario.Id })" 
+                                                   class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-eye"></i> Ver Detalles
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> No hay usuarios nuevos este mes.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Preparar datos para la gráfica
+        var usuarios = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
+        
+        // Agrupar por día
+        var registrosPorDia = {};
+        usuarios.forEach(function(usuario) {
+            var fecha = new Date(usuario.fechaRegistro).toLocaleDateString('es-ES');
+            if (!registrosPorDia[fecha]) {
+                registrosPorDia[fecha] = 0;
+            }
+            registrosPorDia[fecha]++;
+        });
+
+        // Ordenar fechas
+        var fechas = Object.keys(registrosPorDia).sort(function(a, b) {
+            return new Date(a.split('/').reverse().join('-')) - new Date(b.split('/').reverse().join('-'));
+        });
+        var cantidades = fechas.map(function(fecha) { return registrosPorDia[fecha]; });
+
+        // Crear gráfica
+        var ctx = document.getElementById('chartRegistros').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: fechas,
+                datasets: [{
+                    label: 'Nuevos Usuarios',
+                    data: cantidades,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    title: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+}

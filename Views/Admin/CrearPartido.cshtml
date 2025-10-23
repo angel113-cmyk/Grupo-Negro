@@ -1,0 +1,239 @@
+@model Partido
+@{
+    ViewData["Title"] = "Crear Partido";
+    var ligas = ViewBag.Ligas as List<Liga>;
+    var equipos = ViewBag.Equipos as List<Equipo>;
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h2><i class="fas fa-plus-circle"></i> Crear Nuevo Partido</h2>
+                    <p class="text-muted">Crea un nuevo partido y define las cuotas de apuesta</p>
+                </div>
+                <a href="@Url.Action("Partidos", "Admin")" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver a Partidos
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="fas fa-futbol"></i> Datos del Partido</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="CrearPartido" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <!-- Liga -->
+                        <div class="mb-3">
+                            <label asp-for="LigaId" class="form-label">
+                                <i class="fas fa-trophy"></i> Liga:
+                            </label>
+                            <select asp-for="LigaId" class="form-select" required>
+                                <option value="">Seleccionar liga...</option>
+                                @if (ligas != null)
+                                {
+                                    @foreach (var liga in ligas)
+                                    {
+                                        <option value="@liga.Id">@liga.Nombre - @liga.Pais</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <!-- Equipo Local -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="EquipoLocalId" class="form-label">
+                                        <i class="fas fa-home"></i> Equipo Local:
+                                    </label>
+                                    <select asp-for="EquipoLocalId" class="form-select" id="equipoLocal" required>
+                                        <option value="">Seleccionar equipo...</option>
+                                        @if (equipos != null)
+                                        {
+                                            @foreach (var equipo in equipos)
+                                            {
+                                                <option value="@equipo.Id" data-liga="@equipo.LigaId">
+                                                    @equipo.Nombre
+                                                </option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Equipo Visitante -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="EquipoVisitanteId" class="form-label">
+                                        <i class="fas fa-plane"></i> Equipo Visitante:
+                                    </label>
+                                    <select asp-for="EquipoVisitanteId" class="form-select" id="equipoVisitante" required>
+                                        <option value="">Seleccionar equipo...</option>
+                                        @if (equipos != null)
+                                        {
+                                            @foreach (var equipo in equipos)
+                                            {
+                                                <option value="@equipo.Id" data-liga="@equipo.LigaId">
+                                                    @equipo.Nombre
+                                                </option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fecha y Hora -->
+                        <div class="mb-3">
+                            <label asp-for="FechaHora" class="form-label">
+                                <i class="fas fa-calendar-alt"></i> Fecha y Hora del Partido:
+                            </label>
+                            <input asp-for="FechaHora" type="datetime-local" class="form-control" required />
+                        </div>
+
+                        <hr>
+                        <h5 class="mb-3"><i class="fas fa-percentage"></i> Cuotas de Apuesta</h5>
+
+                        <div class="row">
+                            <!-- Cuota Local -->
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="CuotaLocal" class="form-label">
+                                        Cuota Gana Local:
+                                    </label>
+                                    <input asp-for="CuotaLocal" type="number" step="0.01" min="1.01" 
+                                           class="form-control" required placeholder="1.50" />
+                                    <small class="text-muted">Ejemplo: 1.50</small>
+                                </div>
+                            </div>
+
+                            <!-- Cuota Empate -->
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="CuotaEmpate" class="form-label">
+                                        Cuota Empate:
+                                    </label>
+                                    <input asp-for="CuotaEmpate" type="number" step="0.01" min="1.01" 
+                                           class="form-control" required placeholder="3.00" />
+                                    <small class="text-muted">Ejemplo: 3.00</small>
+                                </div>
+                            </div>
+
+                            <!-- Cuota Visitante -->
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="CuotaVisitante" class="form-label">
+                                        Cuota Gana Visitante:
+                                    </label>
+                                    <input asp-for="CuotaVisitante" type="number" step="0.01" min="1.01" 
+                                           class="form-control" required placeholder="2.00" />
+                                    <small class="text-muted">Ejemplo: 2.00</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Nota:</strong> Las cuotas determinan cuánto ganará un usuario por cada dólar apostado.
+                            Una cuota de 2.00 significa que si apuesta $10 y gana, recibirá $20 (su apuesta + ganancia).
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-save"></i> Crear Partido
+                            </button>
+                            <a href="@Url.Action("Partidos", "Admin")" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Filtrar equipos por liga seleccionada
+        document.getElementById('LigaId').addEventListener('change', function() {
+            var ligaId = this.value;
+            var equipoLocalSelect = document.getElementById('equipoLocal');
+            var equipoVisitanteSelect = document.getElementById('equipoVisitante');
+            
+            // Filtrar opciones de equipo local
+            Array.from(equipoLocalSelect.options).forEach(function(option) {
+                if (option.value === '') {
+                    option.style.display = '';
+                    return;
+                }
+                
+                if (option.dataset.liga === ligaId) {
+                    option.style.display = '';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+            
+            // Filtrar opciones de equipo visitante
+            Array.from(equipoVisitanteSelect.options).forEach(function(option) {
+                if (option.value === '') {
+                    option.style.display = '';
+                    return;
+                }
+                
+                if (option.dataset.liga === ligaId) {
+                    option.style.display = '';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+            
+            // Reset selections
+            equipoLocalSelect.value = '';
+            equipoVisitanteSelect.value = '';
+        });
+
+        // Validar que no se seleccione el mismo equipo
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var equipoLocal = document.getElementById('equipoLocal').value;
+            var equipoVisitante = document.getElementById('equipoVisitante').value;
+            
+            if (equipoLocal === equipoVisitante) {
+                e.preventDefault();
+                alert('El equipo local y visitante no pueden ser el mismo.');
+                return false;
+            }
+        });
+
+        // Establecer fecha mínima como hoy
+        var fechaInput = document.querySelector('input[type="datetime-local"]');
+        var now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        fechaInput.min = now.toISOString().slice(0, 16);
+    </script>
+}
