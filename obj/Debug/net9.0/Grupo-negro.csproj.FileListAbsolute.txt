@@ -275,3 +275,4 @@ C:\Users\rs_va\OneDrive\Desktop\Grupo-negro\obj\Debug\net9.0\compressed\xhvbjngd
 C:\Users\rs_va\OneDrive\Desktop\Grupo-negro\obj\Debug\net9.0\compressed\s1s5pgi7oe-dn4ul178yo.gz
 C:\Users\rs_va\OneDrive\Desktop\Grupo-negro\obj\Debug\net9.0\compressed\xhexnf9cgg-hxztzyr6jl.gz
 C:\Users\rs_va\OneDrive\Desktop\Grupo-negro\bin\Debug\net9.0\appsettings.Production.json
+C:\Users\rs_va\OneDrive\Desktop\Grupo-negro\bin\Debug\net9.0\Newtonsoft.Json.dll

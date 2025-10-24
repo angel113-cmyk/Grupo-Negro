@@ -45,6 +45,10 @@ builder.Services.AddScoped<Grupo_negro.Services.CookieService>();
 // Registrar servicio de apuestas combinadas
 builder.Services.AddScoped<Grupo_negro.Services.ApuestaCombinadadService>();
 
+// Registrar servicio de Football API
+builder.Services.AddHttpClient<Grupo_negro.Services.IFootballApiService, Grupo_negro.Services.FootballApiService>();
+builder.Services.AddScoped<Grupo_negro.Services.IFootballApiService, Grupo_negro.Services.FootballApiService>();
+
 // Configurar sesiones para el carrito de apuestas
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>

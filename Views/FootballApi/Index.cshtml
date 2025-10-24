@@ -1,0 +1,437 @@
+@{
+    ViewData["Title"] = "Gestión de API Deportiva";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-futbol text-success"></i> API de Datos Deportivos</h2>
+                <div>
+                    <button class="btn btn-outline-primary" onclick="testConnection()">
+                        <i class="fas fa-wifi"></i> Probar Conexión
+                    </button>
+                    <a href="/Admin" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estado de conexión -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-signal"></i> Estado de la API</h5>
+                </div>
+                <div class="card-body">
+                    <div id="connectionStatus" class="alert alert-secondary">
+                        <i class="fas fa-spinner fa-spin"></i> Verificando conexión...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones principales -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-sync"></i> Sincronización de Datos</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Sincroniza competiciones, equipos y partidos con la API externa.</p>
+                    <button class="btn btn-success" onclick="syncData()" id="syncBtn">
+                        <i class="fas fa-download"></i> Sincronizar Datos
+                    </button>
+                    <div id="syncProgress" class="mt-3" style="display: none;">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <small class="text-muted">Sincronizando datos...</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-list"></i> Explorar Datos</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Consulta datos en tiempo real de la API.</p>
+                    <div class="btn-group-vertical w-100">
+                        <button class="btn btn-outline-primary mb-2" onclick="loadCompetitions()">
+                            <i class="fas fa-trophy"></i> Ver Competiciones
+                        </button>
+                        <button class="btn btn-outline-info mb-2" onclick="loadTodayMatches()">
+                            <i class="fas fa-calendar-day"></i> Partidos de Hoy
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Área de resultados -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-database"></i> Datos de la API</h5>
+                </div>
+                <div class="card-body">
+                    <div id="apiResults">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-info-circle fa-2x mb-3"></i>
+                            <p>Selecciona una acción para ver los datos de la API</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    testConnection();
+});
+
+async function testConnection() {
+    const statusDiv = document.getElementById('connectionStatus');
+    statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando conexión...';
+    statusDiv.className = 'alert alert-info';
+
+    try {
+        const response = await fetch('/FootballApi/TestConnection');
+        const result = await response.json();
+        
+        if (result.success) {
+            statusDiv.innerHTML = `
+                <i class="fas fa-check-circle"></i> 
+                Conexión exitosa - ${result.count} competiciones disponibles
+            `;
+            statusDiv.className = 'alert alert-success';
+        } else {
+            statusDiv.innerHTML = `
+                <i class="fas fa-exclamation-triangle"></i> 
+                Error de conexión: ${result.message}
+            `;
+            statusDiv.className = 'alert alert-warning';
+        }
+    } catch (error) {
+        statusDiv.innerHTML = `
+            <i class="fas fa-times-circle"></i> 
+            Error de red: ${error.message}
+        `;
+        statusDiv.className = 'alert alert-danger';
+    }
+}
+
+async function syncData() {
+    const btn = document.getElementById('syncBtn');
+    const progress = document.getElementById('syncProgress');
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
+    progress.style.display = 'block';
+    
+    // Simular progreso
+    let width = 0;
+    const progressBar = progress.querySelector('.progress-bar');
+    const interval = setInterval(() => {
+        width += 10;
+        progressBar.style.width = width + '%';
+        if (width >= 90) clearInterval(interval);
+    }, 500);
+
+    try {
+        const response = await fetch('/FootballApi/SyncData', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        const result = await response.json();
+        
+        clearInterval(interval);
+        progressBar.style.width = '100%';
+        
+        setTimeout(() => {
+            if (result.success) {
+                showToast('success', 'Sincronización completada exitosamente');
+            } else {
+                showToast('error', 'Error durante la sincronización: ' + result.message);
+            }
+            
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-download"></i> Sincronizar Datos';
+            progress.style.display = 'none';
+            progressBar.style.width = '0%';
+        }, 1000);
+        
+    } catch (error) {
+        clearInterval(interval);
+        showToast('error', 'Error de red: ' + error.message);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-download"></i> Sincronizar Datos';
+        progress.style.display = 'none';
+        progressBar.style.width = '0%';
+    }
+}
+
+async function loadCompetitions() {
+    const resultsDiv = document.getElementById('apiResults');
+    resultsDiv.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando competiciones...</div>';
+
+    try {
+        const response = await fetch('/FootballApi/GetCompetitions');
+        const result = await response.json();
+        
+        if (result.success && result.data.length > 0) {
+            let html = '<h6><i class="fas fa-trophy"></i> Competiciones Disponibles</h6><div class="row">';
+            
+            result.data.slice(0, 12).forEach(comp => {
+                html += `
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h6 class="card-title">${comp.name}</h6>
+                                <p class="card-text">
+                                    <small class="text-muted">Código: ${comp.code || 'N/A'}</small><br>
+                                    <small class="text-muted">Tipo: ${comp.type || 'N/A'}</small>
+                                </p>
+                                <button class="btn btn-sm btn-outline-primary" 
+                                        onclick="loadTeams(${comp.id}, '${comp.name}')">
+                                    Ver Equipos
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" 
+                                        onclick="loadMatches(${comp.id}, '${comp.name}')">
+                                    Ver Partidos
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+        } else {
+            resultsDiv.innerHTML = '<div class="alert alert-warning">No se encontraron competiciones</div>';
+        }
+    } catch (error) {
+        resultsDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+    }
+}
+
+async function loadTeams(competitionId, competitionName) {
+    const resultsDiv = document.getElementById('apiResults');
+    resultsDiv.innerHTML = `<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando equipos de ${competitionName}...</div>`;
+
+    try {
+        const response = await fetch(`/FootballApi/GetTeams?competitionId=${competitionId}`);
+        const result = await response.json();
+        
+        if (result.success && result.data.length > 0) {
+            let html = `<h6><i class="fas fa-users"></i> Equipos de ${competitionName}</h6><div class="row">`;
+            
+            result.data.forEach(team => {
+                html += `
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                ${team.crest ? `<img src="${team.crest}" alt="${team.name}" style="width: 40px; height: 40px; object-fit: contain;" class="mb-2">` : ''}
+                                <h6 class="card-title">${team.name}</h6>
+                                <p class="card-text">
+                                    <small class="text-muted">${team.shortName || team.tla || ''}</small>
+                                    ${team.founded ? `<br><small>Fund. ${team.founded}</small>` : ''}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+        } else {
+            resultsDiv.innerHTML = '<div class="alert alert-warning">No se encontraron equipos</div>';
+        }
+    } catch (error) {
+        resultsDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+    }
+}
+
+async function loadMatches(competitionId, competitionName) {
+    const resultsDiv = document.getElementById('apiResults');
+    resultsDiv.innerHTML = `<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando partidos de ${competitionName}...</div>`;
+
+    try {
+        const response = await fetch(`/FootballApi/GetMatches?competitionId=${competitionId}&days=14`);
+        const result = await response.json();
+        
+        if (result.success && result.data.length > 0) {
+            let html = `<h6><i class="fas fa-futbol"></i> Próximos Partidos - ${competitionName}</h6>`;
+            
+            result.data.forEach(match => {
+                const date = new Date(match.utcDate).toLocaleString('es-PE');
+                const status = getStatusBadge(match.status);
+                
+                html += `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-4">
+                                    <strong>${match.homeTeam.name}</strong>
+                                </div>
+                                <div class="col-md-1 text-center">
+                                    <small>vs</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>${match.awayTeam.name}</strong>
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    ${status}
+                                    <br><small>${date}</small>
+                                    ${match.score && match.score.fullTime ? 
+                                        `<br><span class="badge bg-secondary">${match.score.fullTime.home || 0} - ${match.score.fullTime.away || 0}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            resultsDiv.innerHTML = html;
+        } else {
+            resultsDiv.innerHTML = '<div class="alert alert-warning">No se encontraron partidos próximos</div>';
+        }
+    } catch (error) {
+        resultsDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+    }
+}
+
+async function loadTodayMatches() {
+    const resultsDiv = document.getElementById('apiResults');
+    resultsDiv.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando partidos de hoy...</div>';
+
+    try {
+        const response = await fetch('/FootballApi/GetTodayMatches');
+        const result = await response.json();
+        
+        if (result.success && result.data.length > 0) {
+            let html = '<h6><i class="fas fa-calendar-day"></i> Partidos de Hoy</h6>';
+            
+            result.data.forEach(match => {
+                const time = new Date(match.utcDate).toLocaleTimeString('es-PE', {hour: '2-digit', minute: '2-digit'});
+                const status = getStatusBadge(match.status);
+                
+                html += `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-3">
+                                    <strong>${match.homeTeam.name}</strong>
+                                </div>
+                                <div class="col-md-1 text-center">vs</div>
+                                <div class="col-md-3">
+                                    <strong>${match.awayTeam.name}</strong>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <small>${match.competition.name}</small>
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    ${status}<br>
+                                    <small>${time}</small>
+                                    ${match.score && match.score.fullTime ? 
+                                        `<br><span class="badge bg-secondary">${match.score.fullTime.home || 0} - ${match.score.fullTime.away || 0}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            resultsDiv.innerHTML = html;
+        } else {
+            resultsDiv.innerHTML = '<div class="alert alert-info">No hay partidos programados para hoy</div>';
+        }
+    } catch (error) {
+        resultsDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+    }
+}
+
+function getStatusBadge(status) {
+    switch(status) {
+        case 'SCHEDULED':
+            return '<span class="badge bg-primary">Programado</span>';
+        case 'LIVE':
+        case 'IN_PLAY':
+            return '<span class="badge bg-success">En Vivo</span>';
+        case 'PAUSED':
+            return '<span class="badge bg-warning">Pausado</span>';
+        case 'FINISHED':
+            return '<span class="badge bg-secondary">Finalizado</span>';
+        default:
+            return '<span class="badge bg-light text-dark">Desconocido</span>';
+    }
+}
+
+function showToast(type, message) {
+    // Crear toast dinámicamente
+    const toastHtml = `
+        <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-${type === 'success' ? 'check' : 'exclamation-triangle'}"></i> ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    `;
+    
+    // Agregar al contenedor de toasts o crear uno
+    let toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        document.body.appendChild(toastContainer);
+    }
+    
+    toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+    const toastElement = toastContainer.lastElementChild;
+    const toast = new bootstrap.Toast(toastElement);
+    toast.show();
+    
+    // Remover el elemento después de que se oculte
+    toastElement.addEventListener('hidden.bs.toast', () => {
+        toastElement.remove();
+    });
+}
+</script>
+}
+
+<style>
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.progress {
+    height: 8px;
+}
+
+.btn-group-vertical .btn {
+    text-align: left;
+}
+
+.toast-container {
+    z-index: 1070;
+}
+</style>
