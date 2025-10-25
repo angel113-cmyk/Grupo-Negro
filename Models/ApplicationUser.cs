@@ -31,6 +31,9 @@ namespace Grupo_negro.Models
         // Relación con bonos
         public ICollection<BonoUsuario> Bonos { get; set; } = new List<BonoUsuario>();
 
+        // Relación con transacciones
+        public ICollection<Transaccion> Transacciones { get; set; } = new List<Transaccion>();
+
         public string NombreCompleto => $"{Nombres} {Apellidos}";
     }
 }

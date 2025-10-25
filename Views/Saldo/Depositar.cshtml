@@ -8,83 +8,297 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header bg-success text-white">
                     <h4><i class="fas fa-plus-circle"></i> Depositar Dinero</h4>
                 </div>
                 <div class="card-body">
-                    <form asp-action="Depositar" method="post">
+                    @if (TempData["WarningMessage"] != null)
+                    {
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Atención:</strong> @TempData["WarningMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+                    
+                    @if (ViewBag.PayPalDemoMode == true)
+                    {
+                        <div class="alert alert-info alert-dismissible fade show" role="alert">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Modo Demo:</strong> PayPal está configurado en modo simulación. Los pagos no serán procesados realmente.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+                    
+                    <form asp-action="Depositar" method="post" id="depositForm">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                         
                         <div class="mb-3">
-                            <label asp-for="Monto" class="form-label"></label>
+                            <label asp-for="Monto" class="form-label">Monto a depositar</label>
                             <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                <input asp-for="Monto" class="form-control" placeholder="0.00" step="0.01" />
+                                <span class="input-group-text">S/.</span>
+                                <input asp-for="Monto" class="form-control" placeholder="0.00" step="0.01" min="10" max="1000" />
                             </div>
                             <span asp-validation-for="Monto" class="text-danger"></span>
+                            <small class="form-text text-muted">Monto mínimo: S/.10 - Máximo: S/.1,000</small>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="MetodoPago" class="form-label"></label>
-                            <select asp-for="MetodoPago" class="form-select" id="metodoPago">
+                            <label asp-for="MetodoPago" class="form-label">Método de pago</label>
+                            <select asp-for="MetodoPago" class="form-select" id="metodoPago" onchange="togglePaymentSections()">
                                 <option value="">Selecciona un método</option>
-                                <option value="1">PayPal</option>
-                                <option value="2">Yape</option>
+                                <option value="@((int)MetodoPago.PayPal)">
+                                    <i class="fab fa-paypal"></i> PayPal
+                                </option>
+                                <option value="@((int)MetodoPago.MercadoPago)">
+                                    <i class="fas fa-credit-card text-primary"></i> MercadoPago
+                                </option>
+                                <option value="@((int)MetodoPago.Yape)">
+                                    <i class="fas fa-mobile-alt"></i> Yape
+                                </option>
+                                <option value="@((int)MetodoPago.Plin)">
+                                    <i class="fas fa-credit-card"></i> Plin
+                                </option>
                             </select>
                             <span asp-validation-for="MetodoPago" class="text-danger"></span>
                         </div>
 
+                        <!-- Sección PayPal -->
                         <div class="mb-3" id="paypal-section" style="display: none;">
-                            <label asp-for="EmailPayPal" class="form-label">
-                                <i class="fab fa-paypal"></i> Email de PayPal
-                            </label>
-                            <input asp-for="EmailPayPal" class="form-control" type="email" placeholder="tu@email.com" />
-                            <span asp-validation-for="EmailPayPal" class="text-danger"></span>
+                            @if (ViewBag.PayPalDemoMode == true)
+                            {
+                                <div class="alert alert-info">
+                                    <i class="fab fa-paypal fa-2x float-start me-3"></i>
+                                    <strong>PayPal (Modo Demo)</strong><br>
+                                    El pago será simulado. En un entorno real, serías redirigido a PayPal.
+                                    <br><small class="text-muted">Tipo de cambio simulado: 3.80 PEN = 1 USD</small>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-info">
+                                    <i class="fab fa-paypal fa-2x float-start me-3"></i>
+                                    <strong>PayPal</strong><br>
+                                    Serás redirigido a PayPal para completar el pago de forma segura.
+                                    Se aplicará el tipo de cambio actual (aprox. 3.80 PEN = 1 USD).
+                                </div>
+                            }
                         </div>
 
+                        <!-- Sección MercadoPago -->
+                        <div class="mb-3" id="mercadopago-section" style="display: none;">
+                            <div class="alert alert-info">
+                                <i class="fas fa-credit-card fa-2x float-start me-3 text-primary"></i>
+                                <strong>MercadoPago</strong><br>
+                                Paga con tarjeta de crédito, débito, efectivo o desde tu cuenta MercadoPago.
+                                <br><small class="text-muted">Método seguro y confiable para toda América Latina</small>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="text-center p-3 border rounded">
+                                        <i class="fab fa-cc-visa fa-2x text-primary"></i>
+                                        <i class="fab fa-cc-mastercard fa-2x text-warning"></i>
+                                        <br><small>Tarjetas de Crédito/Débito</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="text-center p-3 border rounded">
+                                        <i class="fas fa-money-bill-alt fa-2x text-success"></i>
+                                        <br><small>Efectivo en puntos de pago</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección Yape -->
                         <div class="mb-3" id="yape-section" style="display: none;">
-                            <label asp-for="NumeroTelefono" class="form-label">
-                                <i class="fas fa-mobile-alt"></i> Número de teléfono para Yape
+                            <div class="alert alert-warning">
+                                <i class="fas fa-mobile-alt fa-2x float-start me-3 text-purple"></i>
+                                <strong>Yape</strong><br>
+                                Transfiere a: <strong>999 888 777</strong> (Grupo Negro)<br>
+                                Luego ingresa el número de operación.
+                            </div>
+                            <label asp-for="NumeroOperacion" class="form-label">
+                                <i class="fas fa-receipt"></i> Número de operación Yape
                             </label>
-                            <input asp-for="NumeroTelefono" class="form-control" type="tel" placeholder="+51 999 999 999" />
-                            <span asp-validation-for="NumeroTelefono" class="text-danger"></span>
+                            <input asp-for="NumeroOperacion" class="form-control" placeholder="Ej: 123456789" maxlength="20" />
+                            <span asp-validation-for="NumeroOperacion" class="text-danger"></span>
                         </div>
 
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i>
-                            <strong>Importante:</strong> Los depósitos se procesan de forma segura. 
-                            PayPal y Yape son métodos de pago confiables y protegidos.
+                        <!-- Sección Plin -->
+                        <div class="mb-3" id="plin-section" style="display: none;">
+                            <div class="alert alert-primary">
+                                <i class="fas fa-credit-card fa-2x float-start me-3"></i>
+                                <strong>Plin</strong><br>
+                                Transfiere a: <strong>999 777 888</strong> (Grupo Negro)<br>
+                                Luego ingresa el número de operación.
+                            </div>
+                            <label asp-for="NumeroOperacion" class="form-label">
+                                <i class="fas fa-receipt"></i> Número de operación Plin
+                            </label>
+                            <input asp-for="NumeroOperacion" class="form-control" placeholder="Ej: PL123456789" maxlength="20" />
+                            <span asp-validation-for="NumeroOperacion" class="text-danger"></span>
                         </div>
 
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="@Url.Action("Index", "Saldo")" class="btn btn-secondary me-md-2">
+                        <div class="mb-3">
+                            <label asp-for="Descripcion" class="form-label">Descripción (opcional)</label>
+                            <textarea asp-for="Descripcion" class="form-control" rows="2" placeholder="Comentarios adicionales..."></textarea>
+                            <span asp-validation-for="Descripcion" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+                                <i class="fas fa-check-circle"></i> Procesar Depósito
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left"></i> Volver
                             </a>
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-credit-card"></i> Procesar Depósito
-                            </button>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <!-- Información adicional -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6><i class="fas fa-info-circle"></i> Información importante</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <i class="fab fa-paypal fa-3x text-primary mb-2"></i>
+                                <h6>PayPal</h6>
+                                <small>Instantáneo y seguro</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <i class="fas fa-mobile-alt fa-3x text-purple mb-2"></i>
+                                <h6>Yape</h6>
+                                <small>Procesamiento inmediato</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <i class="fas fa-credit-card fa-3x text-info mb-2"></i>
+                                <h6>Plin</h6>
+                                <small>Rápido y confiable</small>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <ul class="list-unstyled mb-0">
+                        <li><i class="fas fa-check text-success"></i> Los depósitos se procesan de forma automática</li>
+                        <li><i class="fas fa-check text-success"></i> Monto mínimo: S/.10</li>
+                        <li><i class="fas fa-check text-success"></i> Sin comisiones adicionales</li>
+                        <li><i class="fas fa-check text-success"></i> Soporte 24/7 disponible</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+@section Scripts {
 <script>
-    document.getElementById('metodoPago').addEventListener('change', function() {
-        var paypalSection = document.getElementById('paypal-section');
-        var yapeSection = document.getElementById('yape-section');
-        
-        // Ocultar ambas secciones
-        paypalSection.style.display = 'none';
-        yapeSection.style.display = 'none';
-        
-        // Mostrar la sección correspondiente
-        if (this.value === '1') { // PayPal
+function togglePaymentSections() {
+    const metodoPago = document.getElementById('metodoPago').value;
+    const paypalSection = document.getElementById('paypal-section');
+    const mercadopagoSection = document.getElementById('mercadopago-section');
+    const yapeSection = document.getElementById('yape-section');
+    const plinSection = document.getElementById('plin-section');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Ocultar todas las secciones
+    paypalSection.style.display = 'none';
+    mercadopagoSection.style.display = 'none';
+    yapeSection.style.display = 'none';
+    plinSection.style.display = 'none';
+    
+    // Mostrar la sección correspondiente
+    switch(metodoPago) {
+        case '@((int)MetodoPago.PayPal)':
             paypalSection.style.display = 'block';
-        } else if (this.value === '2') { // Yape
+            submitBtn.innerHTML = '<i class="fab fa-paypal"></i> Pagar con PayPal';
+            submitBtn.className = 'btn btn-primary btn-lg';
+            break;
+        case '@((int)MetodoPago.MercadoPago)':
+            mercadopagoSection.style.display = 'block';
+            submitBtn.innerHTML = '<i class="fas fa-credit-card"></i> Pagar con MercadoPago';
+            submitBtn.className = 'btn btn-primary btn-lg';
+            break;
+        case '@((int)MetodoPago.Yape)':
             yapeSection.style.display = 'block';
-        }
-    });
+            submitBtn.innerHTML = '<i class="fas fa-mobile-alt"></i> Confirmar pago Yape';
+            submitBtn.className = 'btn btn-purple btn-lg';
+            break;
+        case '@((int)MetodoPago.Plin)':
+            plinSection.style.display = 'block';
+            submitBtn.innerHTML = '<i class="fas fa-credit-card"></i> Confirmar pago Plin';
+            submitBtn.className = 'btn btn-info btn-lg';
+            break;
+        default:
+            submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Procesar Depósito';
+            submitBtn.className = 'btn btn-success btn-lg';
+    }
+}
+
+// Formatear el monto mientras se escribe
+document.addEventListener('DOMContentLoaded', function() {
+    const montoInput = document.querySelector('input[name="Monto"]');
+    if (montoInput) {
+        montoInput.addEventListener('input', function() {
+            const value = parseFloat(this.value);
+            if (value && value > 0) {
+                const submitBtn = document.getElementById('submitBtn');
+                const metodoPago = document.getElementById('metodoPago').value;
+                
+                if (metodoPago === '@((int)MetodoPago.PayPal)') {
+                    const usdAmount = (value / 3.8).toFixed(2);
+                    submitBtn.innerHTML = `<i class="fab fa-paypal"></i> Pagar $${usdAmount} USD`;
+                }
+            }
+        });
+    }
+});
 </script>
+
+<style>
+.text-purple {
+    color: #8e44ad !important;
+}
+
+.btn-purple {
+    background-color: #8e44ad;
+    border-color: #8e44ad;
+    color: white;
+}
+
+.btn-purple:hover {
+    background-color: #7d3c98;
+    border-color: #7d3c98;
+    color: white;
+}
+
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.alert {
+    border-left: 4px solid;
+}
+
+.alert-info {
+    border-left-color: #0ea5e9;
+}
+
+.alert-warning {
+    border-left-color: #f59e0b;
+}
+
+.alert-primary {
+    border-left-color: #3b82f6;
+}
+</style>
+}

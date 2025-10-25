@@ -153,7 +153,7 @@ namespace Grupo_negro.Services
                         EquipoLocalId = equipoLocal.Id,
                         EquipoVisitanteId = equipoVisitante.Id,
                         LigaId = liga.Id,
-                        FechaHora = fechaBase.AddDays(i).AddHours(random.Next(14, 22)),
+                        FechaHora = DateTime.Now.AddDays(i + 1).AddHours(random.Next(14, 22)),
                         Jornada = $"Jornada {i + 1}",
                         CuotaLocal = (decimal)(1.2 + random.NextDouble() * 2.0), // 1.2 - 3.2
                         CuotaEmpate = (decimal)(2.5 + random.NextDouble() * 1.5), // 2.5 - 4.0

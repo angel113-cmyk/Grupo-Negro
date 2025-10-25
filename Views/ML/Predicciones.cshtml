@@ -1,0 +1,388 @@
+@using Grupo_negro.ViewModels
+@model PrediccionesViewModel
+@{
+    ViewData["Title"] = "Predicciones ML";
+}
+
+<div class="container-fluid py-4">
+    <!-- Encabezado -->
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 mb-1">🔮 Predicciones Machine Learning</h1>
+                    <p class="text-muted">Próximos partidos con análisis predictivo de IA</p>
+                </div>
+                <div>
+                    <a href="@Url.Action("Dashboard")" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left"></i> Dashboard ML
+                    </a>
+                    <a href="@Url.Action("Recomendaciones")" class="btn btn-success">
+                        <i class="fas fa-star"></i> Ver Recomendaciones
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.ModeloDisponible)
+    {
+        <!-- Advertencia de modelo no disponible -->
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-warning text-center" role="alert">
+                    <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                    <h4>Modelo ML No Disponible</h4>
+                    <p>Para generar predicciones, primero necesitas entrenar el modelo de Machine Learning.</p>
+                    <a href="@Url.Action("Dashboard")" class="btn btn-warning">
+                        <i class="fas fa-brain"></i> Ir a Dashboard ML
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Filtros y controles -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h6 class="mb-2">📊 Filtros de Predicción</h6>
+                            <div class="btn-group" role="group">
+                                <input type="radio" class="btn-check" name="filtroConfianza" id="todos" value="all" checked>
+                                <label class="btn btn-outline-primary" for="todos">Todos</label>
+                                
+                                <input type="radio" class="btn-check" name="filtroConfianza" id="alta" value="high">
+                                <label class="btn btn-outline-success" for="alta">Alta Confianza (70%+)</label>
+                                
+                                <input type="radio" class="btn-check" name="filtroConfianza" id="media" value="medium">
+                                <label class="btn btn-outline-warning" for="media">Media (50-70%)</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <small class="text-muted">
+                                <strong>@Model.PartidosProximos.Count</strong> partidos próximos encontrados
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de partidos con predicciones -->
+    <div class="row" id="partidosContainer">
+        @if (Model.PartidosProximos.Any())
+        {
+            @foreach (var partido in Model.PartidosProximos)
+            {
+                var prediccion = Model.Predicciones.ContainsKey(partido.Id) ? Model.Predicciones[partido.Id] : null;
+                var confianzaClass = "";
+                var badgeClass = "";
+                
+                if (prediccion != null)
+                {
+                    if (prediccion.ConfianzaPrediccion >= 70)
+                    {
+                        confianzaClass = "border-success";
+                        badgeClass = "bg-success";
+                    }
+                    else if (prediccion.ConfianzaPrediccion >= 50)
+                    {
+                        confianzaClass = "border-warning";
+                        badgeClass = "bg-warning";
+                    }
+                    else
+                    {
+                        confianzaClass = "border-secondary";
+                        badgeClass = "bg-secondary";
+                    }
+                }
+
+                <div class="col-lg-6 col-xl-4 mb-4 partido-card" 
+                     data-confianza="@(prediccion?.ConfianzaPrediccion ?? 0)"
+                     data-tipo="@(prediccion?.ConfianzaPrediccion >= 70 ? "high" : prediccion?.ConfianzaPrediccion >= 50 ? "medium" : "low")">
+                    <div class="card shadow-sm h-100 @confianzaClass" style="border-width: 2px;">
+                        <!-- Header del partido -->
+                        <div class="card-header bg-light">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar"></i> @partido.FechaHora.ToString("dd/MM/yyyy HH:mm")
+                                    </small>
+                                    @if (!string.IsNullOrEmpty(partido.Liga?.Nombre))
+                                    {
+                                        <br><small class="badge bg-info">@partido.Liga.Nombre</small>
+                                    }
+                                </div>
+                                <div class="col-auto">
+                                    @if (prediccion != null)
+                                    {
+                                        <span class="badge @badgeClass">
+                                            @prediccion.ConfianzaPrediccion.ToString("F0")% Confianza
+                                        </span>
+                                    }
+                                    else if (Model.ModeloDisponible)
+                                    {
+                                        <button class="btn btn-sm btn-outline-primary" 
+                                                onclick="generarPrediccion(@partido.Id, this)">
+                                            <i class="fas fa-magic"></i> Predecir
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Equipos -->
+                        <div class="card-body">
+                            <div class="row align-items-center text-center">
+                                <div class="col-4">
+                                    <div class="team-info">
+                                        <h6 class="mb-1 @(prediccion?.ResultadoPredicho == "Local" ? "text-success fw-bold" : "")">
+                                            @(partido.EquipoLocal?.Nombre ?? "Equipo Local")
+                                        </h6>
+                                        <small class="text-muted">LOCAL</small>
+                                        @if (prediccion?.ResultadoPredicho == "Local")
+                                        {
+                                            <br><span class="badge bg-success">Favorito IA</span>
+                                        }
+                                    </div>
+                                </div>
+                                
+                                <div class="col-4">
+                                    <div class="vs-section">
+                                        <h4 class="mb-0 @(prediccion?.ResultadoPredicho == "Empate" ? "text-warning fw-bold" : "text-muted")">
+                                            VS
+                                        </h4>
+                                        @if (prediccion?.ResultadoPredicho == "Empate")
+                                        {
+                                            <small class="badge bg-warning text-dark">Empate Probable</small>
+                                        }
+                                    </div>
+                                </div>
+                                
+                                <div class="col-4">
+                                    <div class="team-info">
+                                        <h6 class="mb-1 @(prediccion?.ResultadoPredicho == "Visitante" ? "text-success fw-bold" : "")">
+                                            @(partido.EquipoVisitante?.Nombre ?? "Equipo Visitante")
+                                        </h6>
+                                        <small class="text-muted">VISITANTE</small>
+                                        @if (prediccion?.ResultadoPredicho == "Visitante")
+                                        {
+                                            <br><span class="badge bg-success">Favorito IA</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (prediccion != null)
+                            {
+                                <!-- Probabilidades -->
+                                <div class="mt-3">
+                                    <h6 class="small text-muted mb-2">📊 PROBABILIDADES ML</h6>
+                                    <div class="row text-center small">
+                                        <div class="col-4">
+                                            <div class="probability-bar">
+                                                <div class="progress mb-1" style="height: 6px;">
+                                                    <div class="progress-bar bg-primary" 
+                                                         style="width: @((prediccion.ProbabilidadLocal * 100).ToString("F0"))%"></div>
+                                                </div>
+                                                <strong>@((prediccion.ProbabilidadLocal * 100).ToString("F1"))%</strong>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="probability-bar">
+                                                <div class="progress mb-1" style="height: 6px;">
+                                                    <div class="progress-bar bg-warning" 
+                                                         style="width: @((prediccion.ProbabilidadEmpate * 100).ToString("F0"))%"></div>
+                                                </div>
+                                                <strong>@((prediccion.ProbabilidadEmpate * 100).ToString("F1"))%</strong>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="probability-bar">
+                                                <div class="progress mb-1" style="height: 6px;">
+                                                    <div class="progress-bar bg-success" 
+                                                         style="width: @((prediccion.ProbabilidadVisitante * 100).ToString("F0"))%"></div>
+                                                </div>
+                                                <strong>@((prediccion.ProbabilidadVisitante * 100).ToString("F1"))%</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Recomendación de apuesta -->
+                                @if (prediccion.ConfianzaPrediccion >= 50)
+                                {
+                                    <div class="mt-3 p-2 bg-light rounded">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <small class="text-muted">💡 Recomendación IA:</small><br>
+                                                <strong class="text-primary">@prediccion.RecomendacionApuesta</strong>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge bg-primary">
+                                                    Valor: @prediccion.ValorApuesta.ToString("F1")/10
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+
+                        <!-- Footer con acciones -->
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    @if (prediccion?.ConfianzaPrediccion >= 65)
+                                    {
+                                        <i class="fas fa-thumbs-up text-success"></i>
+                                        <small class="text-success">Recomendado</small>
+                                    }
+                                    else if (prediccion?.ConfianzaPrediccion >= 50)
+                                    {
+                                        <i class="fas fa-exclamation text-warning"></i>
+                                        <small class="text-warning">Moderado</small>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-question text-muted"></i>
+                                        <small class="text-muted">Incierto</small>
+                                    }
+                                </div>
+                                <div>
+                                    <a href="@Url.Action("Details", "Apuestas", new { id = partido.Id })" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-coins"></i> Apostar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <!-- No hay partidos -->
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">No hay partidos próximos</h4>
+                    <p class="text-muted">No se encontraron partidos en los próximos 14 días.</p>
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-primary">
+                        <i class="fas fa-home"></i> Volver al Inicio
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Filtros de confianza
+            document.querySelectorAll('input[name="filtroConfianza"]').forEach(radio => {
+                radio.addEventListener('change', filtrarPartidos);
+            });
+        });
+
+        function filtrarPartidos() {
+            const filtro = document.querySelector('input[name="filtroConfianza"]:checked').value;
+            const partidos = document.querySelectorAll('.partido-card');
+
+            partidos.forEach(partido => {
+                const tipo = partido.dataset.tipo;
+                let mostrar = true;
+
+                switch(filtro) {
+                    case 'high':
+                        mostrar = tipo === 'high';
+                        break;
+                    case 'medium':
+                        mostrar = tipo === 'medium';
+                        break;
+                    case 'all':
+                    default:
+                        mostrar = true;
+                        break;
+                }
+
+                partido.style.display = mostrar ? 'block' : 'none';
+            });
+        }
+
+        function generarPrediccion(partidoId, button) {
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Prediciendo...';
+            button.disabled = true;
+
+            fetch('@Url.Action("PredecirPartido")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify(partidoId)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Recargar la página para mostrar la nueva predicción
+                    location.reload();
+                } else {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    alert('Error generando predicción: ' + data.message);
+                }
+            })
+            .catch(error => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+                alert('Error de conexión al generar predicción');
+            });
+        }
+    </script>
+
+    <style>
+        .partido-card {
+            transition: transform 0.2s;
+        }
+        
+        .partido-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .team-info h6 {
+            font-size: 0.9rem;
+        }
+        
+        .vs-section h4 {
+            font-weight: bold;
+        }
+        
+        .probability-bar {
+            padding: 0 5px;
+        }
+        
+        .progress {
+            background-color: #e9ecef;
+        }
+        
+        .border-success {
+            border-color: #198754 !important;
+        }
+        
+        .border-warning {
+            border-color: #ffc107 !important;
+        }
+        
+        .border-secondary {
+            border-color: #6c757d !important;
+        }
+    </style>
+}

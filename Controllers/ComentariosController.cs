@@ -47,7 +47,7 @@ namespace Grupo_negro.Controllers
             {
                 Comentarios = comentarios,
                 TotalComentarios = totalComentarios,
-                PuedeComentarUsuario = User.Identity.IsAuthenticated
+                PuedeComentarUsuario = User.Identity?.IsAuthenticated == true
             };
 
             return View(viewModel);
@@ -56,21 +56,23 @@ namespace Grupo_negro.Controllers
         // POST: Crear comentario
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Crear(ComentarioViewModel modelo)
+        public async Task<IActionResult> Crear(ListaComentariosViewModel modelo)
         {
-            if (ModelState.IsValid)
+            // Validar solo el NuevoComentario
+            if (!string.IsNullOrWhiteSpace(modelo.NuevoComentario?.Contenido))
             {
                 var usuario = await _userManager.GetUserAsync(User);
                 if (usuario == null)
                 {
+                    TempData["ErrorMessage"] = "Debes iniciar sesión para comentar.";
                     return RedirectToAction("Login", "Account");
                 }
 
                 var comentario = new Comentario
                 {
-                    Contenido = modelo.Contenido.Trim(),
+                    Contenido = modelo.NuevoComentario.Contenido.Trim(),
                     UsuarioId = usuario.Id,
-                    ComentarioPadreId = modelo.ComentarioPadreId,
+                    ComentarioPadreId = modelo.NuevoComentario.ComentarioPadreId,
                     FechaCreacion = DateTime.Now
                 };
 

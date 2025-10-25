@@ -9,19 +9,19 @@ namespace Grupo_negro.Models
         public int Id { get; set; }
         
         [JsonProperty("name")]
-        public string Name { get; set; }
+        public required string Name { get; set; }
         
         [JsonProperty("code")]
-        public string Code { get; set; }
+        public required string Code { get; set; }
         
         [JsonProperty("type")]
-        public string Type { get; set; }
+        public required string Type { get; set; }
         
         [JsonProperty("emblem")]
-        public string Emblem { get; set; }
+        public string? Emblem { get; set; }
         
         [JsonProperty("currentSeason")]
-        public FootballApiSeason CurrentSeason { get; set; }
+        public FootballApiSeason? CurrentSeason { get; set; }
     }
 
     public class FootballApiSeason
@@ -45,22 +45,22 @@ namespace Grupo_negro.Models
         public int Id { get; set; }
         
         [JsonProperty("name")]
-        public string Name { get; set; }
+        public required string Name { get; set; }
         
         [JsonProperty("shortName")]
-        public string ShortName { get; set; }
+        public string? ShortName { get; set; }
         
         [JsonProperty("tla")]
-        public string Tla { get; set; }
+        public string? Tla { get; set; }
         
         [JsonProperty("crest")]
-        public string Crest { get; set; }
+        public string? Crest { get; set; }
         
         [JsonProperty("founded")]
         public int? Founded { get; set; }
         
         [JsonProperty("venue")]
-        public string Venue { get; set; }
+        public string? Venue { get; set; }
     }
 
     public class FootballApiMatch
@@ -72,43 +72,43 @@ namespace Grupo_negro.Models
         public DateTime UtcDate { get; set; }
         
         [JsonProperty("status")]
-        public string Status { get; set; }
+        public required string Status { get; set; }
         
         [JsonProperty("matchday")]
         public int Matchday { get; set; }
         
         [JsonProperty("stage")]
-        public string Stage { get; set; }
+        public string? Stage { get; set; }
         
         [JsonProperty("homeTeam")]
-        public FootballApiTeam HomeTeam { get; set; }
+        public required FootballApiTeam HomeTeam { get; set; }
         
         [JsonProperty("awayTeam")]
-        public FootballApiTeam AwayTeam { get; set; }
+        public required FootballApiTeam AwayTeam { get; set; }
         
         [JsonProperty("score")]
-        public FootballApiScore Score { get; set; }
+        public FootballApiScore? Score { get; set; }
         
         [JsonProperty("odds")]
-        public FootballApiOdds Odds { get; set; }
+        public FootballApiOdds? Odds { get; set; }
         
         [JsonProperty("competition")]
-        public FootballApiCompetition Competition { get; set; }
+        public required FootballApiCompetition Competition { get; set; }
     }
 
     public class FootballApiScore
     {
         [JsonProperty("winner")]
-        public string Winner { get; set; }
+        public string? Winner { get; set; }
         
         [JsonProperty("duration")]
-        public string Duration { get; set; }
+        public string? Duration { get; set; }
         
         [JsonProperty("fullTime")]
-        public FootballApiResult FullTime { get; set; }
+        public FootballApiResult? FullTime { get; set; }
         
         [JsonProperty("halfTime")]
-        public FootballApiResult HalfTime { get; set; }
+        public FootballApiResult? HalfTime { get; set; }
     }
 
     public class FootballApiResult
@@ -123,7 +123,7 @@ namespace Grupo_negro.Models
     public class FootballApiOdds
     {
         [JsonProperty("msg")]
-        public string Message { get; set; }
+        public string? Message { get; set; }
         
         // Simulamos odds ya que la API gratuita no las incluye
         public decimal HomeWin => GenerateOdds(1.5m, 3.5m);
@@ -141,26 +141,26 @@ namespace Grupo_negro.Models
     public class FootballApiCompetitionsResponse
     {
         [JsonProperty("competitions")]
-        public List<FootballApiCompetition> Competitions { get; set; }
+        public required List<FootballApiCompetition> Competitions { get; set; }
     }
 
     public class FootballApiTeamsResponse
     {
         [JsonProperty("teams")]
-        public List<FootballApiTeam> Teams { get; set; }
+        public required List<FootballApiTeam> Teams { get; set; }
     }
 
     public class FootballApiMatchesResponse
     {
         [JsonProperty("matches")]
-        public List<FootballApiMatch> Matches { get; set; }
+        public required List<FootballApiMatch> Matches { get; set; }
     }
 
     // Modelos para configuración
     public class FootballApiSettings
     {
         public string BaseUrl { get; set; } = "https://api.football-data.org/v4";
-        public string ApiKey { get; set; }
+        public required string ApiKey { get; set; }
         public int RequestDelayMs { get; set; } = 6000; // 10 requests per minute limit
     }
 }

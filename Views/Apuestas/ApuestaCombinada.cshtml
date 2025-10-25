@@ -1,0 +1,393 @@
+@model List<Partido>
+@{
+    ViewData["Title"] = "Apuesta Combinada";
+}
+
+<div class="container-fluid mt-3">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body bg-gradient text-white" style="background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h2 class="mb-1">
+                                <i class="fas fa-layer-group me-2"></i>Apuesta Combinada
+                            </h2>
+                            <p class="mb-0 opacity-75">Combina múltiples partidos para mayores ganancias</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="text-white">
+                                <small>Tu saldo:</small>
+                                <h4>${{ViewBag.SaldoUsuario:F2}}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtro por Liga -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="mb-0">
+                                <i class="fas fa-filter me-2"></i>Filtrar por Liga
+                            </h6>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary btn-sm liga-filter active" data-liga="0">
+                                Todas las Ligas
+                            </button>
+                            @if (ViewBag.Ligas != null)
+                            {
+                                @foreach (var liga in (List<Liga>)ViewBag.Ligas)
+                                {
+                                    <button class="btn btn-outline-secondary btn-sm liga-filter" data-liga="@liga.Id">
+                                        @liga.Nombre
+                                    </button>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form asp-action="CrearApuestaCombinada" method="post" id="combinedForm">
+        <div class="row">
+            <!-- Lista de Partidos para Seleccionar -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-futbol me-2"></i>Selecciona los Partidos
+                            <small class="text-muted">(Mínimo 2 partidos)</small>
+                        </h5>
+                    </div>
+                    <div class="card-body p-0" id="partidosContainer">
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var partido in Model)
+                            {
+                                <div class="match-selection border-bottom p-3" data-liga="@partido.LigaId">
+                                    <div class="row align-items-center">
+                                        <!-- Información del Partido -->
+                                        <div class="col-md-6">
+                                            <div class="match-info">
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <span class="badge bg-primary me-2">@partido.Liga.Nombre</span>
+                                                    <small class="text-muted">Jornada @partido.Jornada</small>
+                                                </div>
+                                                <h6 class="mb-1">@partido.EquipoLocal.Nombre vs @partido.EquipoVisitante.Nombre</h6>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-calendar me-1"></i>
+                                                    @partido.FechaHora.ToString("dd/MM/yyyy HH:mm")
+                                                </small>
+                                            </div>
+                                        </div>
+
+                                        <!-- Opciones de Apuesta -->
+                                        <div class="col-md-6">
+                                            <div class="bet-options">
+                                                <div class="d-flex gap-2 justify-content-end">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input match-checkbox" type="checkbox" 
+                                                               name="partidosSeleccionados" value="@partido.Id" 
+                                                               id="match_@partido.Id" onchange="toggleMatch(@partido.Id)">
+                                                        <label class="form-check-label" for="match_@partido.Id">
+                                                            Incluir
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Tipo de Apuesta -->
+                                                <div class="bet-type-selection mt-2" id="betTypes_@partido.Id" style="display: none;">
+                                                    <div class="d-flex gap-1">
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input" type="radio" 
+                                                                   name="tipoApuesta_@partido.Id" value="1" 
+                                                                   id="local_@partido.Id" onchange="updateSelection()">
+                                                            <label class="form-check-label btn btn-outline-success btn-sm" for="local_@partido.Id">
+                                                                1 (@partido.CuotaLocal.ToString("F2"))
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input" type="radio" 
+                                                                   name="tipoApuesta_@partido.Id" value="2" 
+                                                                   id="empate_@partido.Id" onchange="updateSelection()">
+                                                            <label class="form-check-label btn btn-outline-warning btn-sm" for="empate_@partido.Id">
+                                                                X (@partido.CuotaEmpate.ToString("F2"))
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input" type="radio" 
+                                                                   name="tipoApuesta_@partido.Id" value="3" 
+                                                                   id="visitante_@partido.Id" onchange="updateSelection()">
+                                                            <label class="form-check-label btn btn-outline-success btn-sm" for="visitante_@partido.Id">
+                                                                2 (@partido.CuotaVisitante.ToString("F2"))
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center p-5">
+                                <i class="fas fa-futbol fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No hay partidos disponibles</h5>
+                                <p class="text-muted">No se encontraron partidos para apuestas combinadas.</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel de Resumen -->
+            <div class="col-lg-4">
+                <div class="card sticky-top">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="fas fa-calculator me-2"></i>Resumen de Apuesta
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="selectionSummary">
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-info-circle fa-2x mb-2"></i>
+                                <p class="mb-0">Selecciona al menos 2 partidos para comenzar</p>
+                            </div>
+                        </div>
+
+                        <div id="betSummary" style="display: none;">
+                            <!-- Lista de Selecciones -->
+                            <div class="mb-3">
+                                <h6 class="text-muted">Partidos Seleccionados:</h6>
+                                <div id="selectedMatches" class="small">
+                                    <!-- Se llena dinámicamente -->
+                                </div>
+                            </div>
+
+                            <!-- Cuota Total -->
+                            <div class="mb-3 p-2 bg-light rounded">
+                                <div class="d-flex justify-content-between">
+                                    <span>Cuota Total:</span>
+                                    <strong id="totalOdds">1.00</strong>
+                                </div>
+                            </div>
+
+                            <!-- Monto a Apostar -->
+                            <div class="mb-3">
+                                <label class="form-label">Monto a Apostar:</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" name="montoTotal" 
+                                           id="montoTotal" min="1" max="@ViewBag.SaldoUsuario" 
+                                           step="0.01" placeholder="0.00" onchange="updateSelection()">
+                                </div>
+                                <small class="text-muted">Saldo disponible: $@ViewBag.SaldoUsuario</small>
+                            </div>
+
+                            <!-- Ganancia Potencial -->
+                            <div class="mb-3 p-3 bg-success bg-opacity-10 rounded">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Ganancia Potencial:</span>
+                                    <strong class="text-success fs-5" id="potentialWin">$0.00</strong>
+                                </div>
+                            </div>
+
+                            <!-- Hidden inputs para los tipos de apuesta -->
+                            <div id="hiddenInputs"></div>
+
+                            <!-- Botón de Apuesta -->
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-danger btn-lg" id="placeBtn" disabled>
+                                    <i class="fas fa-dice me-2"></i>Realizar Apuesta Combinada
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        let selectedMatches = [];
+        let matchData = @Html.Raw(Json.Serialize(Model.ToDictionary(p => p.Id, p => new { 
+            id = p.Id, 
+            local = p.EquipoLocal.Nombre, 
+            visitante = p.EquipoVisitante.Nombre,
+            cuotaLocal = p.CuotaLocal,
+            cuotaEmpate = p.CuotaEmpate, 
+            cuotaVisitante = p.CuotaVisitante,
+            ligaId = p.LigaId
+        })));
+
+        function toggleMatch(matchId) {
+            const checkbox = document.getElementById(`match_${matchId}`);
+            const betTypes = document.getElementById(`betTypes_${matchId}`);
+            
+            if (checkbox.checked) {
+                betTypes.style.display = 'block';
+            } else {
+                betTypes.style.display = 'none';
+                // Remover de seleccionados
+                selectedMatches = selectedMatches.filter(m => m.id !== matchId);
+                updateSelection();
+            }
+        }
+
+        function updateSelection() {
+            // Recopilar todas las selecciones
+            selectedMatches = [];
+            
+            document.querySelectorAll('.match-checkbox:checked').forEach(checkbox => {
+                const matchId = parseInt(checkbox.value);
+                const selectedBet = document.querySelector(`input[name="tipoApuesta_${matchId}"]:checked`);
+                
+                if (selectedBet) {
+                    const match = matchData[matchId];
+                    let cuota, descripcion;
+                    
+                    switch (selectedBet.value) {
+                        case '1':
+                            cuota = match.cuotaLocal;
+                            descripcion = `${match.local} gana`;
+                            break;
+                        case '2':
+                            cuota = match.cuotaEmpate;
+                            descripcion = 'Empate';
+                            break;
+                        case '3':
+                            cuota = match.cuotaVisitante;
+                            descripcion = `${match.visitante} gana`;
+                            break;
+                    }
+                    
+                    selectedMatches.push({
+                        id: matchId,
+                        descripcion: descripcion,
+                        cuota: cuota,
+                        tipo: parseInt(selectedBet.value),
+                        nombrePartido: `${match.local} vs ${match.visitante}`
+                    });
+                }
+            });
+            
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const summaryDiv = document.getElementById('selectionSummary');
+            const betSummaryDiv = document.getElementById('betSummary');
+            
+            if (selectedMatches.length < 2) {
+                summaryDiv.style.display = 'block';
+                betSummaryDiv.style.display = 'none';
+                return;
+            }
+            
+            summaryDiv.style.display = 'none';
+            betSummaryDiv.style.display = 'block';
+            
+            // Actualizar lista de partidos seleccionados
+            const selectedMatchesDiv = document.getElementById('selectedMatches');
+            selectedMatchesDiv.innerHTML = selectedMatches.map(match => 
+                `<div class="d-flex justify-content-between mb-1">
+                    <span class="text-truncate">${match.descripcion}</span>
+                    <strong>${match.cuota.toFixed(2)}</strong>
+                </div>`
+            ).join('');
+            
+            // Calcular cuota total
+            const totalOdds = selectedMatches.reduce((total, match) => total * match.cuota, 1);
+            document.getElementById('totalOdds').textContent = totalOdds.toFixed(2);
+            
+            // Calcular ganancia potencial
+            const monto = parseFloat(document.getElementById('montoTotal').value) || 0;
+            const potentialWin = monto * totalOdds;
+            document.getElementById('potentialWin').textContent = `$${potentialWin.toFixed(2)}`;
+            
+            // Actualizar hidden inputs
+            const hiddenInputsDiv = document.getElementById('hiddenInputs');
+            hiddenInputsDiv.innerHTML = selectedMatches.map(match => 
+                `<input type="hidden" name="tiposApuesta" value="${match.tipo}">`
+            ).join('');
+            
+            // Habilitar/deshabilitar botón
+            const placeBtn = document.getElementById('placeBtn');
+            placeBtn.disabled = selectedMatches.length < 2 || monto <= 0 || monto > @ViewBag.SaldoUsuario;
+        }
+
+        // Filtros de liga
+        document.addEventListener('DOMContentLoaded', function() {
+            const ligaFilters = document.querySelectorAll('.liga-filter');
+            
+            ligaFilters.forEach(filter => {
+                filter.addEventListener('click', function() {
+                    // Cambiar botón activo
+                    ligaFilters.forEach(f => f.classList.remove('active', 'btn-primary'));
+                    ligaFilters.forEach(f => f.classList.add('btn-outline-secondary'));
+                    
+                    this.classList.remove('btn-outline-secondary');
+                    this.classList.add('active', 'btn-primary');
+                    
+                    const ligaId = this.getAttribute('data-liga');
+                    
+                    // Filtrar partidos
+                    const matchSelections = document.querySelectorAll('.match-selection');
+                    matchSelections.forEach(match => {
+                        if (ligaId === '0' || match.getAttribute('data-liga') === ligaId) {
+                            match.style.display = 'block';
+                        } else {
+                            match.style.display = 'none';
+                            // Deseleccionar si estaba seleccionado
+                            const checkbox = match.querySelector('.match-checkbox');
+                            if (checkbox.checked) {
+                                checkbox.checked = false;
+                                toggleMatch(parseInt(checkbox.value));
+                            }
+                        }
+                    });
+                });
+            });
+        });
+
+        // Validación del formulario
+        document.getElementById('combinedForm').addEventListener('submit', function(e) {
+            if (selectedMatches.length < 2) {
+                e.preventDefault();
+                alert('Debes seleccionar al menos 2 partidos para una apuesta combinada.');
+                return false;
+            }
+            
+            const monto = parseFloat(document.getElementById('montoTotal').value);
+            if (!monto || monto <= 0) {
+                e.preventDefault();
+                alert('Debes ingresar un monto válido.');
+                return false;
+            }
+            
+            if (monto > @ViewBag.SaldoUsuario) {
+                e.preventDefault();
+                alert('El monto excede tu saldo disponible.');
+                return false;
+            }
+            
+            return confirm(`¿Confirmas la apuesta combinada de $${monto.toFixed(2)}?`);
+        });
+    </script>
+}

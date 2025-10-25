@@ -1,0 +1,426 @@
+@model List<Transaccion>
+@using Grupo_negro.Models
+@{
+    ViewData["Title"] = "Historial de Transacciones";
+}
+
+<div class="container-fluid py-4">
+    <!-- Encabezado -->
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 mb-1">
+                        <i class="fas fa-history me-2"></i>Historial de Transacciones
+                    </h1>
+                    <p class="text-muted">Consulta todas tus operaciones de depósitos, retiros y apuestas</p>
+                </div>
+                <div>
+                    <a asp-action="Index" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left"></i> Volver a Saldo
+                    </a>
+                    <button class="btn btn-success" onclick="exportarHistorial()">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label">Tipo de Transacción</label>
+                            <select class="form-select" id="filtroTipo">
+                                <option value="">Todas</option>
+                                <option value="Deposito">Depósitos</option>
+                                <option value="Retiro">Retiros</option>
+                                <option value="Apuesta">Apuestas</option>
+                                <option value="Ganancia">Ganancias</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Estado</label>
+                            <select class="form-select" id="filtroEstado">
+                                <option value="">Todos</option>
+                                <option value="Completada">Completadas</option>
+                                <option value="Pendiente">Pendientes</option>
+                                <option value="Cancelada">Canceladas</option>
+                                <option value="Fallida">Fallidas</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Fecha Desde</label>
+                            <input type="date" class="form-control" id="fechaDesde">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Fecha Hasta</label>
+                            <input type="date" class="form-control" id="fechaHasta">
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-primary w-100" onclick="aplicarFiltros()">
+                                <i class="fas fa-filter"></i> Filtrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumen -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4 id="totalDepositos">$@Model.Where(t => t.Tipo == TipoTransaccion.Deposito && t.Estado == EstadoTransaccion.Completada).Sum(t => t.Monto).ToString("N2")</h4>
+                    <small>Total Depósitos</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h4 id="totalRetiros">$@Model.Where(t => t.Tipo == TipoTransaccion.Retiro && t.Estado == EstadoTransaccion.Completada).Sum(t => t.Monto).ToString("N2")</h4>
+                    <small>Total Retiros</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h4 id="totalApuestas">$@Model.Where(t => t.Tipo == TipoTransaccion.Apuesta).Sum(t => t.Monto).ToString("N2")</h4>
+                    <small>Total Apostado</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h4 id="totalGanancias">$@Model.Where(t => t.Tipo == TipoTransaccion.Ganancia).Sum(t => t.Monto).ToString("N2")</h4>
+                    <small>Total Ganancias</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de transacciones -->
+    <div class="row">
+        <div class="col-12">
+            @if (Model.Any())
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2"></i>Transacciones (@Model.Count)
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="tablaTransacciones">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th><i class="fas fa-calendar me-1"></i>Fecha</th>
+                                        <th><i class="fas fa-tag me-1"></i>Tipo</th>
+                                        <th><i class="fas fa-dollar-sign me-1"></i>Monto</th>
+                                        <th><i class="fas fa-info-circle me-1"></i>Estado</th>
+                                        <th><i class="fas fa-credit-card me-1"></i>Método</th>
+                                        <th><i class="fas fa-comment me-1"></i>Descripción</th>
+                                        <th><i class="fas fa-cog me-1"></i>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var transaccion in Model.OrderByDescending(t => t.FechaCreacion))
+                                    {
+                                        <tr class="transaccion-row" 
+                                            data-tipo="@transaccion.Tipo" 
+                                            data-estado="@transaccion.Estado" 
+                                            data-fecha="@transaccion.FechaCreacion.ToString("yyyy-MM-dd")">
+                                            
+                                            <!-- Fecha -->
+                                            <td>
+                                                <div>
+                                                    <strong>@transaccion.FechaCreacion.ToString("dd/MM/yyyy")</strong>
+                                                </div>
+                                                <small class="text-muted">@transaccion.FechaCreacion.ToString("HH:mm")</small>
+                                            </td>
+
+                                            <!-- Tipo -->
+                                            <td>
+                                                @switch (transaccion.Tipo)
+                                                {
+                                                    case TipoTransaccion.Deposito:
+                                                        <span class="badge bg-success">
+                                                            <i class="fas fa-plus me-1"></i>Depósito
+                                                        </span>
+                                                        break;
+                                                    case TipoTransaccion.Retiro:
+                                                        <span class="badge bg-danger">
+                                                            <i class="fas fa-minus me-1"></i>Retiro
+                                                        </span>
+                                                        break;
+                                                    case TipoTransaccion.Apuesta:
+                                                        <span class="badge bg-warning text-dark">
+                                                            <i class="fas fa-dice me-1"></i>Apuesta
+                                                        </span>
+                                                        break;
+                                                    case TipoTransaccion.Ganancia:
+                                                        <span class="badge bg-info">
+                                                            <i class="fas fa-trophy me-1"></i>Ganancia
+                                                        </span>
+                                                        break;
+                                                    default:
+                                                        <span class="badge bg-secondary">@transaccion.Tipo</span>
+                                                        break;
+                                                }
+                                            </td>
+
+                                            <!-- Monto -->
+                                            <td>
+                                                <strong class="@(transaccion.Tipo == TipoTransaccion.Deposito || transaccion.Tipo == TipoTransaccion.Ganancia ? "text-success" : "text-danger")">
+                                                    @(transaccion.Tipo == TipoTransaccion.Deposito || transaccion.Tipo == TipoTransaccion.Ganancia ? "+" : "-")$@transaccion.Monto.ToString("N2")
+                                                </strong>
+                                            </td>
+
+                                            <!-- Estado -->
+                                            <td>
+                                                @switch (transaccion.Estado)
+                                                {
+                                                    case EstadoTransaccion.Completada:
+                                                        <span class="badge bg-success">
+                                                            <i class="fas fa-check me-1"></i>Completada
+                                                        </span>
+                                                        break;
+                                                    case EstadoTransaccion.Pendiente:
+                                                        <span class="badge bg-warning text-dark">
+                                                            <i class="fas fa-clock me-1"></i>Pendiente
+                                                        </span>
+                                                        break;
+                                                    case EstadoTransaccion.Cancelada:
+                                                        <span class="badge bg-secondary">
+                                                            <i class="fas fa-times me-1"></i>Cancelada
+                                                        </span>
+                                                        break;
+                                                    case EstadoTransaccion.Fallida:
+                                                        <span class="badge bg-danger">
+                                                            <i class="fas fa-exclamation me-1"></i>Fallida
+                                                        </span>
+                                                        break;
+                                                    default:
+                                                        <span class="badge bg-secondary">@transaccion.Estado</span>
+                                                        break;
+                                                }
+                                            </td>
+
+                                            <!-- Método de Pago -->
+                                            <td>
+                                                @switch (transaccion.MetodoPago)
+                                                {
+                                                    case MetodoPago.MercadoPago:
+                                                        <span class="text-primary">
+                                                            <i class="fab fa-cc-mastercard me-1"></i>MercadoPago
+                                                        </span>
+                                                        break;
+                                                    case MetodoPago.PayPal:
+                                                        <span class="text-info">
+                                                            <i class="fab fa-paypal me-1"></i>PayPal
+                                                        </span>
+                                                        break;
+                                                    case MetodoPago.Yape:
+                                                        <span class="text-success">
+                                                            <i class="fas fa-mobile-alt me-1"></i>Yape
+                                                        </span>
+                                                        break;
+                                                    case MetodoPago.Plin:
+                                                        <span class="text-warning">
+                                                            <i class="fas fa-mobile-alt me-1"></i>Plin
+                                                        </span>
+                                                        break;
+                                                    default:
+                                                        <span>@transaccion.MetodoPago</span>
+                                                        break;
+                                                }
+                                            </td>
+
+                                            <!-- Descripción -->
+                                            <td>
+                                                <div style="max-width: 200px;">
+                                                    @if (!string.IsNullOrEmpty(transaccion.Descripcion))
+                                                    {
+                                                        <span title="@transaccion.Descripcion">
+                                                            @(transaccion.Descripcion.Length > 50 ? transaccion.Descripcion.Substring(0, 50) + "..." : transaccion.Descripcion)
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">Sin descripción</span>
+                                                    }
+                                                </div>
+                                            </td>
+
+                                            <!-- Acciones -->
+                                            <td>
+                                                <div class="btn-group-sm">
+                                                    <button class="btn btn-outline-primary btn-sm" 
+                                                            onclick="verDetalle(@transaccion.Id)" 
+                                                            title="Ver detalle">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    @if (!string.IsNullOrEmpty(transaccion.ReferenciaPago))
+                                                    {
+                                                        <button class="btn btn-outline-info btn-sm" 
+                                                                onclick="copiarReferencia('@transaccion.ReferenciaPago')" 
+                                                                title="Copiar referencia">
+                                                            <i class="fas fa-copy"></i>
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paginación (si es necesaria) -->
+                @if (Model.Count > 50)
+                {
+                    <div class="d-flex justify-content-center mt-4">
+                        <nav>
+                            <ul class="pagination">
+                                <li class="page-item disabled">
+                                    <span class="page-link">Anterior</span>
+                                </li>
+                                <li class="page-item active">
+                                    <span class="page-link">1</span>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">Siguiente</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            }
+            else
+            {
+                <!-- Sin transacciones -->
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">No hay transacciones</h4>
+                    <p class="text-muted">Aún no has realizado ninguna transacción.</p>
+                    <div class="mt-3">
+                        <a asp-action="Depositar" class="btn btn-success me-2">
+                            <i class="fas fa-plus"></i> Realizar Depósito
+                        </a>
+                        <a asp-controller="Apuestas" asp-action="Index" class="btn btn-primary">
+                            <i class="fas fa-dice"></i> Ver Apuestas
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal de detalle -->
+<div class="modal fade" id="modalDetalle" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalle de Transacción</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="detalleContent">
+                <!-- Se carga dinámicamente -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Aplicar filtros
+        function aplicarFiltros() {
+            const tipo = document.getElementById('filtroTipo').value;
+            const estado = document.getElementById('filtroEstado').value;
+            const fechaDesde = document.getElementById('fechaDesde').value;
+            const fechaHasta = document.getElementById('fechaHasta').value;
+
+            const filas = document.querySelectorAll('.transaccion-row');
+            
+            filas.forEach(fila => {
+                let mostrar = true;
+                
+                if (tipo && fila.dataset.tipo !== tipo) mostrar = false;
+                if (estado && fila.dataset.estado !== estado) mostrar = false;
+                if (fechaDesde && fila.dataset.fecha < fechaDesde) mostrar = false;
+                if (fechaHasta && fila.dataset.fecha > fechaHasta) mostrar = false;
+                
+                fila.style.display = mostrar ? '' : 'none';
+            });
+        }
+
+        // Ver detalle de transacción
+        function verDetalle(transaccionId) {
+            // Aquí podrías hacer una llamada AJAX para obtener más detalles
+            document.getElementById('detalleContent').innerHTML = `
+                <p><strong>ID:</strong> ${transaccionId}</p>
+                <p><strong>Información:</strong> Detalles completos de la transacción...</p>
+                <p><em>Funcionalidad en desarrollo</em></p>
+            `;
+            new bootstrap.Modal(document.getElementById('modalDetalle')).show();
+        }
+
+        // Copiar referencia externa
+        function copiarReferencia(referencia) {
+            navigator.clipboard.writeText(referencia).then(() => {
+                alert('Referencia copiada: ' + referencia);
+            });
+        }
+
+        // Exportar historial
+        function exportarHistorial() {
+            const filas = document.querySelectorAll('.transaccion-row:not([style*="display: none"])');
+            let csv = 'Fecha,Tipo,Monto,Estado,Método,Descripción\n';
+            
+            filas.forEach(fila => {
+                const celdas = fila.querySelectorAll('td');
+                const fecha = celdas[0].textContent.trim().replace(/\s+/g, ' ');
+                const tipo = celdas[1].textContent.trim();
+                const monto = celdas[2].textContent.trim();
+                const estado = celdas[3].textContent.trim();
+                const metodo = celdas[4].textContent.trim();
+                const descripcion = celdas[5].textContent.trim();
+                
+                csv += `"${fecha}","${tipo}","${monto}","${estado}","${metodo}","${descripcion}"\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `historial_transacciones_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Configurar fechas por defecto
+        document.addEventListener('DOMContentLoaded', function() {
+            const hoy = new Date();
+            const hace30Dias = new Date(hoy.getTime() - 30 * 24 * 60 * 60 * 1000);
+            
+            document.getElementById('fechaDesde').value = hace30Dias.toISOString().split('T')[0];
+            document.getElementById('fechaHasta').value = hoy.toISOString().split('T')[0];
+        });
+    </script>
+}

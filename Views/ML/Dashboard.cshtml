@@ -1,0 +1,406 @@
+@using Grupo_negro.ViewModels
+@model MLDashboardViewModel
+@{
+    ViewData["Title"] = "Machine Learning - Dashboard";
+}
+
+<div class="container-fluid py-4">
+    <!-- Encabezado -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-gradient-primary shadow-lg">
+                <div class="card-body text-white">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h1 class="mb-0">🤖 Machine Learning Dashboard</h1>
+                            <p class="mb-0 opacity-8">Predicciones inteligentes para apuestas deportivas</p>
+                        </div>
+                        <div class="col-4 text-end">
+                            @if (!Model.EstaModeloEntrenado)
+                            {
+                                <button class="btn btn-warning btn-lg" id="btnEntrenarModelo">
+                                    <i class="fas fa-brain"></i> Entrenar Modelo
+                                </button>
+                            }
+                            else
+                            {
+                                <div class="d-flex align-items-center justify-content-end">
+                                    <i class="fas fa-check-circle fa-2x me-2"></i>
+                                    <div>
+                                        <div>✅ Modelo Activo</div>
+                                        <small class="opacity-8">Accuracy: @((Model.AccuracyModelo * 100).ToString("F1"))%</small>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Principales -->
+    <div class="row mt-4">
+        <div class="col-xl-3 col-sm-6 mb-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0">Partidos Históricos</h5>
+                            <span class="h2 font-weight-bold mb-0">@Model.TotalPartidosHistoricos.ToString("N0")</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-gradient-red text-white rounded-circle shadow">
+                                <i class="fas fa-history"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-sm-6 mb-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0">Próximos Partidos</h5>
+                            <span class="h2 font-weight-bold mb-0">@Model.PartidosProximos</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-gradient-green text-white rounded-circle shadow">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-sm-6 mb-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0">Accuracy Modelo</h5>
+                            <span class="h2 font-weight-bold mb-0 @(Model.AccuracyModelo > 0.6 ? "text-success" : Model.AccuracyModelo > 0.5 ? "text-warning" : "text-danger")">
+                                @((Model.AccuracyModelo * 100).ToString("F1"))%
+                            </span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-gradient-info text-white rounded-circle shadow">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-sm-6 mb-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0">Recomendaciones</h5>
+                            <span class="h2 font-weight-bold mb-0">@Model.RecomendacionesRecientes.Count</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-gradient-orange text-white rounded-circle shadow">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estado del Modelo y Acciones Rápidas -->
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-transparent">
+                    <h3 class="mb-0">📊 Estado del Sistema ML</h3>
+                </div>
+                <div class="card-body">
+                    @if (Model.EstaModeloEntrenado)
+                    {
+                        <div class="alert alert-success" role="alert">
+                            <h4 class="alert-heading">🎯 ¡Sistema Operativo!</h4>
+                            <p>El modelo de Machine Learning está entrenado y listo para generar predicciones.</p>
+                            <hr>
+                            @if (Model.RendimientoActual != null)
+                            {
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <strong>@Model.RendimientoActual.TotalPredicciones</strong><br>
+                                        <small class="text-muted">Predicciones Total</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <strong class="@(Model.RendimientoActual.AccuracyGeneral > 60 ? "text-success" : "text-warning")">
+                                            @Model.RendimientoActual.AccuracyGeneral.ToString("F1")%
+                                        </strong><br>
+                                        <small class="text-muted">Accuracy Real</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <strong class="@(Model.RendimientoActual.BeneficioAcumulado > 0 ? "text-success" : "text-danger")">
+                                            $@Model.RendimientoActual.BeneficioAcumulado.ToString("F2")
+                                        </strong><br>
+                                        <small class="text-muted">Beneficio Simulado</small>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="@Url.Action("Predicciones")" class="btn btn-primary me-md-2">
+                                <i class="fas fa-crystal-ball"></i> Ver Predicciones
+                            </a>
+                            <a href="@Url.Action("Recomendaciones")" class="btn btn-success me-md-2">
+                                <i class="fas fa-star"></i> Recomendaciones
+                            </a>
+                            <a href="@Url.Action("Rendimiento")" class="btn btn-info">
+                                <i class="fas fa-chart-bar"></i> Análisis Rendimiento
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning" role="alert">
+                            <h4 class="alert-heading">⚠️ Modelo No Entrenado</h4>
+                            <p>Para comenzar a usar las predicciones ML, primero necesitas entrenar el modelo con datos históricos.</p>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>¿Qué hace el entrenamiento?</h6>
+                                    <ul class="small">
+                                        <li>Analiza partidos históricos</li>
+                                        <li>Calcula estadísticas de equipos</li>
+                                        <li>Entrena algoritmo FastTree</li>
+                                        <li>Valida la precisión del modelo</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Datos necesarios:</h6>
+                                    <ul class="small">
+                                        <li>Mínimo 50 partidos (recomendado 200+)</li>
+                                        <li>Resultados y estadísticas</li>
+                                        <li>Información de equipos y ligas</li>
+                                        <li>Tiempo estimado: 30-60 segundos</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <button class="btn btn-warning btn-lg" id="btnEntrenarModelo2">
+                                <i class="fas fa-brain"></i> Entrenar Modelo Ahora
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-transparent">
+                    <h3 class="mb-0">⭐ Recomendaciones Recientes</h3>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecomendacionesRecientes.Any())
+                    {
+                        @foreach (var recomendacion in Model.RecomendacionesRecientes.Take(3))
+                        {
+                            <div class="border-bottom pb-2 mb-2">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <strong class="small">@recomendacion.EquipoLocal vs @recomendacion.EquipoVisitante</strong><br>
+                                        <span class="badge bg-primary">@recomendacion.ResultadoRecomendado</span>
+                                        <small class="text-muted ms-1">@recomendacion.ConfianzaML.ToString("F0")% confianza</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <small class="text-muted">@recomendacion.FechaPartido.ToString("dd/MM")</small><br>
+                                        <span class="badge @(recomendacion.TipoApuesta == "FUERTE" ? "bg-success" : recomendacion.TipoApuesta == "MODERADA" ? "bg-warning" : "bg-secondary")">
+                                            @recomendacion.TipoApuesta
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <div class="text-center mt-3">
+                            <a href="@Url.Action("Recomendaciones")" class="btn btn-sm btn-outline-primary">
+                                Ver Todas las Recomendaciones
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted">
+                            <i class="fas fa-info-circle fa-2x mb-2"></i>
+                            <p>No hay recomendaciones disponibles.<br>
+                            @if (!Model.EstaModeloEntrenado)
+                            {
+                                <small>Entrena el modelo primero.</small>
+                            }
+                            else
+                            {
+                                <small>No hay partidos próximos con suficiente confianza.</small>
+                            }
+                            </p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enlaces Rápidos -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title">🚀 Enlaces Rápidos</h5>
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            <a href="@Url.Action("Predicciones")" class="text-decoration-none">
+                                <div class="p-3 border rounded hover-shadow">
+                                    <i class="fas fa-crystal-ball fa-2x text-primary mb-2"></i>
+                                    <h6>Predicciones</h6>
+                                    <small class="text-muted">Ver predicciones de próximos partidos</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <a href="@Url.Action("Recomendaciones")" class="text-decoration-none">
+                                <div class="p-3 border rounded hover-shadow">
+                                    <i class="fas fa-star fa-2x text-success mb-2"></i>
+                                    <h6>Recomendaciones</h6>
+                                    <small class="text-muted">Apuestas recomendadas por IA</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <a href="@Url.Action("Rendimiento")" class="text-decoration-none">
+                                <div class="p-3 border rounded hover-shadow">
+                                    <i class="fas fa-chart-line fa-2x text-info mb-2"></i>
+                                    <h6>Rendimiento</h6>
+                                    <small class="text-muted">Análisis de precisión del modelo</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <a href="@Url.Action("Index", "Apuestas")" class="text-decoration-none">
+                                <div class="p-3 border rounded hover-shadow">
+                                    <i class="fas fa-coins fa-2x text-warning mb-2"></i>
+                                    <h6>Apostar</h6>
+                                    <small class="text-muted">Ir a realizar apuestas</small>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Entrenamiento -->
+<div class="modal fade" id="modalEntrenamiento" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">🤖 Entrenando Modelo ML</h5>
+            </div>
+            <div class="modal-body text-center">
+                <div id="loadingEntrenamiento">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Entrenando...</span>
+                    </div>
+                    <p class="mt-3">Analizando datos históricos y entrenando el modelo...</p>
+                    <small class="text-muted">Esto puede tomar 30-60 segundos</small>
+                </div>
+                <div id="resultadoEntrenamiento" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Manejadores para botones de entrenar modelo
+            document.getElementById('btnEntrenarModelo')?.addEventListener('click', entrenarModelo);
+            document.getElementById('btnEntrenarModelo2')?.addEventListener('click', entrenarModelo);
+        });
+
+        function entrenarModelo() {
+            const modal = new bootstrap.Modal(document.getElementById('modalEntrenamiento'));
+            modal.show();
+
+            fetch('@Url.Action("EntrenarModelo")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': '@Html.AntiForgeryToken()'.split('value="')[1].split('"')[0]
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loadingEntrenamiento').style.display = 'none';
+                const resultado = document.getElementById('resultadoEntrenamiento');
+                
+                if (data.success) {
+                    resultado.innerHTML = `
+                        <div class="alert alert-success">
+                            <h5>✅ ¡Entrenamiento Exitoso!</h5>
+                            <p>Accuracy: <strong>${(data.metrics.accuracy * 100).toFixed(1)}%</strong></p>
+                            <p>Partidos de entrenamiento: <strong>${data.metrics.partidosEntrenamiento}</strong></p>
+                            <p>Tiempo: <strong>${data.metrics.tiempoEntrenamiento.toFixed(1)} segundos</strong></p>
+                            <button class="btn btn-success" onclick="location.reload()">Continuar</button>
+                        </div>
+                    `;
+                } else {
+                    resultado.innerHTML = `
+                        <div class="alert alert-danger">
+                            <h5>❌ Error en el Entrenamiento</h5>
+                            <p>${data.message}</p>
+                            <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                    `;
+                }
+                resultado.style.display = 'block';
+            })
+            .catch(error => {
+                document.getElementById('loadingEntrenamiento').style.display = 'none';
+                document.getElementById('resultadoEntrenamiento').innerHTML = `
+                    <div class="alert alert-danger">
+                        <h5>❌ Error de Conexión</h5>
+                        <p>No se pudo completar el entrenamiento.</p>
+                        <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                `;
+                document.getElementById('resultadoEntrenamiento').style.display = 'block';
+            });
+        }
+    </script>
+
+    <style>
+        .hover-shadow:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+            transition: box-shadow 0.15s ease-in-out;
+        }
+        
+        .icon-shape {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .bg-gradient-primary { background: linear-gradient(45deg, #667eea 0%, #764ba2 100%); }
+        .bg-gradient-red { background: linear-gradient(45deg, #ff6b6b 0%, #ee5a52 100%); }
+        .bg-gradient-green { background: linear-gradient(45deg, #51cf66 0%, #40c057 100%); }
+        .bg-gradient-info { background: linear-gradient(45deg, #74c0fc 0%, #339af0 100%); }
+        .bg-gradient-orange { background: linear-gradient(45deg, #ffd43b 0%, #fab005 100%); }
+    </style>
+}

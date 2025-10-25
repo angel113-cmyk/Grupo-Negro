@@ -72,6 +72,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXB1ZXN0YXNcQXBvc3Rhci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Apuestas/ApuestaCombinada.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXB1ZXN0YXNcQXB1ZXN0YUNvbWJpbmFkYS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Apuestas/CarritoApuestas.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXB1ZXN0YXNcQ2Fycml0b0FwdWVzdGFzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -112,8 +116,32 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/ML/Dashboard.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTUxcRGFzaGJvYXJkLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/ML/Predicciones.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTUxcUHJlZGljY2lvbmVzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/ML/Recomendaciones.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTUxcUmVjb21lbmRhY2lvbmVzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/ML/Rendimiento.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTUxcUmVuZGltaWVudG8uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Saldo/CheckoutMercadoPagoSimulado.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2FsZG9cQ2hlY2tvdXRNZXJjYWRvUGFnb1NpbXVsYWRvLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Saldo/Depositar.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2FsZG9cRGVwb3NpdGFyLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Saldo/Historial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2FsZG9cSGlzdG9yaWFsLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Saldo/Index.cshtml]

@@ -48,6 +48,10 @@ namespace Grupo_negro.Models
         [StringLength(20)]
         public string? Jornada { get; set; }
 
+        // Resultado del partido (para ML)
+        [StringLength(50)]
+        public string? Resultado { get; set; }
+
         // Relaciones
         public ICollection<Apuesta> Apuestas { get; set; } = new List<Apuesta>();
     }

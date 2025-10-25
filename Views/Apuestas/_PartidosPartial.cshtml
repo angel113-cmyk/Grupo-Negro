@@ -73,50 +73,35 @@
                         <div class="col-lg-4 col-12">
                             <div class="quick-bet-section">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <div class="quick-bet-title">Apuesta Rápida</div>
+                                    <div class="quick-bet-title">Cuotas Disponibles</div>
                                     <small class="text-muted">
-                                        <i class="fas fa-info-circle"></i> Para combinar
+                                        <i class="fas fa-info-circle"></i> Haz clic para apostar
                                     </small>
                                 </div>
                                 <div class="row g-2 mt-1">
                                     <div class="col-4">
-                                        <div class="d-grid gap-1">
-                                            <button class="btn btn-outline-success btn-sm quick-bet-btn" 
-                                                    onclick="quickBet(@partido.Id, 1, @partido.CuotaLocal)">
-                                                1<br><small>@partido.CuotaLocal.ToString("F2")</small>
-                                            </button>
-                                            <button class="btn btn-outline-primary btn-xs" 
-                                                    onclick="agregarACarrito(@partido.Id, 1, @partido.CuotaLocal)" 
-                                                    title="Agregar al carrito">
-                                                <i class="fas fa-plus"></i>
-                                            </button>
-                                        </div>
+                                        <button class="btn btn-success btn-sm w-100 quick-bet-btn" 
+                                                onclick="quickBet(@partido.Id, 1, @partido.CuotaLocal)"
+                                                title="Apostar por @partido.EquipoLocal.Nombre">
+                                            <strong>1</strong><br>
+                                            <small>@partido.CuotaLocal.ToString("F2")</small>
+                                        </button>
                                     </div>
                                     <div class="col-4">
-                                        <div class="d-grid gap-1">
-                                            <button class="btn btn-outline-warning btn-sm quick-bet-btn" 
-                                                    onclick="quickBet(@partido.Id, 2, @partido.CuotaEmpate)">
-                                                X<br><small>@partido.CuotaEmpate.ToString("F2")</small>
-                                            </button>
-                                            <button class="btn btn-outline-primary btn-xs" 
-                                                    onclick="agregarACarrito(@partido.Id, 2, @partido.CuotaEmpate)" 
-                                                    title="Agregar al carrito">
-                                                <i class="fas fa-plus"></i>
-                                            </button>
-                                        </div>
+                                        <button class="btn btn-warning btn-sm w-100 quick-bet-btn" 
+                                                onclick="quickBet(@partido.Id, 2, @partido.CuotaEmpate)"
+                                                title="Apostar por Empate">
+                                            <strong>X</strong><br>
+                                            <small>@partido.CuotaEmpate.ToString("F2")</small>
+                                        </button>
                                     </div>
                                     <div class="col-4">
-                                        <div class="d-grid gap-1">
-                                            <button class="btn btn-outline-success btn-sm quick-bet-btn" 
-                                                    onclick="quickBet(@partido.Id, 3, @partido.CuotaVisitante)">
-                                                2<br><small>@partido.CuotaVisitante.ToString("F2")</small>
-                                            </button>
-                                            <button class="btn btn-outline-primary btn-xs" 
-                                                    onclick="agregarACarrito(@partido.Id, 3, @partido.CuotaVisitante)" 
-                                                    title="Agregar al carrito">
-                                                <i class="fas fa-plus"></i>
-                                            </button>
-                                        </div>
+                                        <button class="btn btn-success btn-sm w-100 quick-bet-btn" 
+                                                onclick="quickBet(@partido.Id, 3, @partido.CuotaVisitante)"
+                                                title="Apostar por @partido.EquipoVisitante.Nombre">
+                                            <strong>2</strong><br>
+                                            <small>@partido.CuotaVisitante.ToString("F2")</small>
+                                        </button>
                                     </div>
                                 </div>
                             </div>

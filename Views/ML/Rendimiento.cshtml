@@ -1,0 +1,248 @@
+@using Grupo_negro.ViewModels
+@model RendimientoViewModel
+@{
+    ViewData["Title"] = "Análisis de Rendimiento ML";
+}
+
+<div class="container-fluid py-4">
+    <!-- Encabezado -->
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 mb-1">📈 Análisis de Rendimiento ML</h1>
+                    <p class="text-muted">Evaluación de precisión del modelo en los últimos @Model.DiasAnalisis días</p>
+                </div>
+                <div>
+                    <a href="@Url.Action("Dashboard")" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left"></i> Dashboard
+                    </a>
+                    <div class="btn-group">
+                        <a href="@Url.Action("Rendimiento", new { dias = 7 })" class="btn btn-outline-primary @(Model.DiasAnalisis == 7 ? "active" : "")">7 días</a>
+                        <a href="@Url.Action("Rendimiento", new { dias = 30 })" class="btn btn-outline-primary @(Model.DiasAnalisis == 30 ? "active" : "")">30 días</a>
+                        <a href="@Url.Action("Rendimiento", new { dias = 90 })" class="btn btn-outline-primary @(Model.DiasAnalisis == 90 ? "active" : "")">90 días</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Métricas principales -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="text-@(Model.Rendimiento.AccuracyGeneral >= 60 ? "success" : Model.Rendimiento.AccuracyGeneral >= 50 ? "warning" : "danger")">
+                        @Model.Rendimiento.AccuracyGeneral.ToString("F1")%
+                    </h2>
+                    <h6 class="text-muted">Accuracy General</h6>
+                    <small class="text-muted">
+                        @Model.Rendimiento.PrediccionesCorrectas de @Model.Rendimiento.TotalPredicciones predicciones
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="text-@(Model.Rendimiento.BeneficioAcumulado > 0 ? "success" : "danger")">
+                        $@Model.Rendimiento.BeneficioAcumulado.ToString("F2")
+                    </h2>
+                    <h6 class="text-muted">Beneficio Simulado</h6>
+                    <small class="text-muted">
+                        Apostando $10 por recomendación
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="text-primary">@Model.Rendimiento.TotalPredicciones</h2>
+                    <h6 class="text-muted">Total Predicciones</h6>
+                    <small class="text-muted">
+                        Con confianza ≥ 50%
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="text-info">
+                        @((Model.Rendimiento.BeneficioAcumulado / (Model.Rendimiento.TotalPredicciones * 10) * 100).ToString("F1"))%
+                    </h2>
+                    <h6 class="text-muted">ROI</h6>
+                    <small class="text-muted">
+                        Retorno sobre inversión
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accuracy por tipo de resultado -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🎯 Precisión por Tipo de Resultado</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @foreach (var kvp in Model.Rendimiento.AccuracyPorTipo)
+                        {
+                            var accuracy = kvp.Value;
+                            var tipo = kvp.Key;
+                            var color = accuracy >= 60 ? "success" : accuracy >= 50 ? "warning" : "danger";
+                            var icono = tipo == "Local" ? "🏠" : tipo == "Visitante" ? "✈️" : "⚖️";
+                            
+                            <div class="col-md-4 mb-3">
+                                <div class="border rounded p-3 text-center">
+                                    <h3>@icono</h3>
+                                    <h4 class="text-@color">@accuracy.ToString("F1")%</h4>
+                                    <h6 class="text-muted">@tipo</h6>
+                                    
+                                    <div class="progress mt-2" style="height: 8px;">
+                                        <div class="progress-bar bg-@color" style="width: @accuracy.ToString("F0")%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Análisis detallado -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">📊 Resumen del Rendimiento</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Período Analizado:</strong></td>
+                                <td>@Model.DiasAnalisis días</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Fecha Evaluación:</strong></td>
+                                <td>@Model.Rendimiento.FechaEvaluacion.ToString("dd/MM/yyyy HH:mm")</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Predicciones:</strong></td>
+                                <td>@Model.Rendimiento.TotalPredicciones</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Predicciones Correctas:</strong></td>
+                                <td class="text-success">@Model.Rendimiento.PrediccionesCorrectas</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Predicciones Incorrectas:</strong></td>
+                                <td class="text-danger">@(Model.Rendimiento.TotalPredicciones - Model.Rendimiento.PrediccionesCorrectas)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Inversión Total:</strong></td>
+                                <td>$@((Model.Rendimiento.TotalPredicciones * 10).ToString("F2"))</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Beneficio/Pérdida:</strong></td>
+                                <td class="@(Model.Rendimiento.BeneficioAcumulado >= 0 ? "text-success" : "text-danger")">
+                                    $@Model.Rendimiento.BeneficioAcumulado.ToString("F2")
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">🎓 Interpretación y Consejos</h5>
+                </div>
+                <div class="card-body">
+                    @{
+                        var accuracyGeneral = Model.Rendimiento.AccuracyGeneral;
+                        var beneficio = Model.Rendimiento.BeneficioAcumulado;
+                        var roi = (beneficio / (Model.Rendimiento.TotalPredicciones * 10)) * 100;
+                    }
+
+                    @if (accuracyGeneral >= 70)
+                    {
+                        <div class="alert alert-success">
+                            <h6><i class="fas fa-trophy"></i> Excelente Rendimiento</h6>
+                            <p>El modelo muestra una precisión excepcional. Las recomendaciones son altamente confiables.</p>
+                        </div>
+                    }
+                    else if (accuracyGeneral >= 60)
+                    {
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-thumbs-up"></i> Buen Rendimiento</h6>
+                            <p>El modelo funciona bien. Las predicciones son útiles para tomar decisiones informadas.</p>
+                        </div>
+                    }
+                    else if (accuracyGeneral >= 50)
+                    {
+                        <div class="alert alert-warning">
+                            <h6><i class="fas fa-exclamation-triangle"></i> Rendimiento Moderado</h6>
+                            <p>El modelo necesita más datos o ajustes. Usa las predicciones con precaución.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-danger">
+                            <h6><i class="fas fa-times-circle"></i> Bajo Rendimiento</h6>
+                            <p>El modelo requiere reentrenamiento urgente. No confíes en las predicciones actuales.</p>
+                        </div>
+                    }
+
+                    <h6 class="mt-3">💡 Recomendaciones:</h6>
+                    <ul class="small">
+                        @if (Model.Rendimiento.TotalPredicciones < 50)
+                        {
+                            <li>Necesitas más datos históricos para evaluar correctamente.</li>
+                        }
+                        @if (accuracyGeneral < 60)
+                        {
+                            <li>Considera reentrenar el modelo con más datos.</li>
+                            <li>Revisa la calidad de los datos de entrada.</li>
+                        }
+                        @if (beneficio < 0)
+                        {
+                            <li>Ajusta los umbrales de confianza para recomendar.</li>
+                            <li>Reduce los montos sugeridos hasta mejorar el modelo.</li>
+                        }
+                        @if (roi > 10)
+                        {
+                            <li>¡Excelente! El modelo está generando valor real.</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .progress {
+        background-color: #e9ecef;
+    }
+    
+    .table td {
+        border: none;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+</style>

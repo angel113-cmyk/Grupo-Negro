@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     <header>
@@ -27,7 +28,7 @@
                         <li class="nav-item">
                             <a class="nav-link custom-link" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
                         </li>
-                        @if (User.Identity.IsAuthenticated)
+                        @if (User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle custom-link" href="#" id="apuestasDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -35,18 +36,17 @@
                                 </a>
                                 <ul class="dropdown-menu" aria-labelledby="apuestasDropdown">
                                     <li><a class="dropdown-item" asp-controller="Apuestas" asp-action="Index">
-                                        <i class="fas fa-list me-2"></i>Ver Apuestas
+                                        <i class="fas fa-futbol me-2"></i>Apuestas Simples
                                     </a></li>
-                                    <li><a class="dropdown-item" asp-controller="Apuestas" asp-action="CarritoApuestas">
-                                        <i class="fas fa-shopping-cart me-2"></i>Carrito 
-                                        <span class="badge bg-primary ms-1" id="navCarritoContador" style="display: none;">0</span>
+                                    <li><a class="dropdown-item" asp-controller="Apuestas" asp-action="ApuestaCombinada">
+                                        <i class="fas fa-layer-group me-2"></i>Apuestas Combinadas
                                     </a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" asp-controller="Apuestas" asp-action="MisApuestas">
-                                        <i class="fas fa-history me-2"></i>Mis Apuestas
+                                        <i class="fas fa-history me-2"></i>Mis Apuestas Simples
                                     </a></li>
                                     <li><a class="dropdown-item" asp-controller="Apuestas" asp-action="MisApuestasCombinadas">
-                                        <i class="fas fa-layer-group me-2"></i>Apuestas Combinadas
+                                        <i class="fas fa-chart-line me-2"></i>Mis Combinadas
                                     </a></li>
                                 </ul>
                             </li>
@@ -58,6 +58,11 @@
                                     </a>
                                 </li>
                             }
+                            <li class="nav-item">
+                                <a class="nav-link custom-link" asp-area="" asp-controller="ML" asp-action="Dashboard">
+                                    <i class="fas fa-brain"></i> Machine Learning
+                                </a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link custom-link" asp-area="" asp-controller="Comentarios" asp-action="Index">
                                     <i class="fas fa-comments"></i> Comentarios
@@ -71,7 +76,7 @@
 
                     <!-- Acciones de usuario (derecha) -->
                     <ul class="navbar-nav ms-auto custom-nav">
-                        @if (User.Identity.IsAuthenticated)
+                        @if (User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle custom-link" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">

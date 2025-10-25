@@ -94,7 +94,7 @@
                                     {
                                         <tr class="usuario-row" 
                                             data-nombre="@usuario.NombreCompleto.ToLower()" 
-                                            data-email="@usuario.Email.ToLower()" 
+                                            data-email="@(usuario.Email?.ToLower() ?? "")" 
                                             data-dni="@(usuario.DNI ?? "")"
                                             data-saldo="@usuario.Saldo"
                                             data-fecha="@usuario.FechaRegistro.Ticks">

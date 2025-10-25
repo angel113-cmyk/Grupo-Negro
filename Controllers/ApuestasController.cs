@@ -74,8 +74,19 @@ namespace Grupo_negro.Controllers
         }
 
         // GET: /Apuestas/PorLiga/{ligaId}
+        [HttpGet]
         public async Task<IActionResult> PorLiga(int ligaId)
         {
+            // Inicializar datos simulados si no existen
+            await _datosService.InicializarDatosAsync();
+
+            // Verificar si hay partidos futuros, si no regenerar
+            var partidosConFechaFutura = await _context.Partidos.CountAsync(p => p.FechaHora > DateTime.Now);
+            if (partidosConFechaFutura == 0)
+            {
+                await _datosService.RegenerarPartidosAsync();
+            }
+
             var partidos = await _context.Partidos
                 .Include(p => p.EquipoLocal)
                 .Include(p => p.EquipoVisitante)
@@ -84,7 +95,19 @@ namespace Grupo_negro.Controllers
                 .OrderBy(p => p.FechaHora)
                 .ToListAsync();
 
-            return PartialView("_PartidosPartial", partidos);
+            // Debug info
+            Console.WriteLine($"Filtro por Liga ID: {ligaId}");
+            Console.WriteLine($"Partidos encontrados: {partidos.Count}");
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_PartidosPartial", partidos);
+            }
+
+            // Si no es AJAX, devolver vista completa con filtro aplicado
+            ViewBag.Ligas = await _context.Ligas.ToListAsync();
+            ViewBag.LigaSeleccionada = ligaId;
+            return View("Index", partidos);
         }
 
         // GET: /Apuestas/Apostar/{partidoId}
@@ -414,6 +437,123 @@ namespace Grupo_negro.Controllers
                 .ToListAsync();
 
             return View(apuestasCombinadas);
+        }
+
+        // GET: /Apuestas/ApuestaCombinada
+        public async Task<IActionResult> ApuestaCombinada()
+        {
+            // Obtener partidos disponibles para combinadas
+            var partidos = await _context.Partidos
+                .Include(p => p.EquipoLocal)
+                .Include(p => p.EquipoVisitante)
+                .Include(p => p.Liga)
+                .Where(p => p.Estado == EstadoPartido.Programado && p.FechaHora > DateTime.Now)
+                .OrderBy(p => p.FechaHora)
+                .Take(20) // Limitar a 20 partidos para mejor performance
+                .ToListAsync();
+
+            var usuario = await _userManager.GetUserAsync(User);
+            ViewBag.SaldoUsuario = usuario?.Saldo ?? 0m;
+            ViewBag.Ligas = await _context.Ligas.ToListAsync();
+
+            return View(partidos);
+        }
+
+        // POST: /Apuestas/CrearApuestaCombinada
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CrearApuestaCombinada([FromForm] List<int> partidosSeleccionados, 
+                                                               [FromForm] List<int> tiposApuesta, 
+                                                               [FromForm] decimal montoTotal)
+        {
+            if (partidosSeleccionados == null || !partidosSeleccionados.Any() || partidosSeleccionados.Count < 2)
+            {
+                TempData["Error"] = "Debes seleccionar al menos 2 partidos para una apuesta combinada.";
+                return RedirectToAction("ApuestaCombinada");
+            }
+
+            if (montoTotal <= 0)
+            {
+                TempData["Error"] = "El monto debe ser mayor a cero.";
+                return RedirectToAction("ApuestaCombinada");
+            }
+
+            var usuario = await _userManager.GetUserAsync(User);
+            if (usuario == null)
+            {
+                TempData["Error"] = "Error al obtener datos del usuario.";
+                return RedirectToAction("ApuestaCombinada");
+            }
+
+            if (usuario.Saldo < montoTotal)
+            {
+                TempData["Error"] = $"Saldo insuficiente. Tu saldo actual es ${usuario.Saldo:F2}.";
+                return RedirectToAction("ApuestaCombinada");
+            }
+
+            // Obtener los partidos seleccionados
+            var partidos = await _context.Partidos
+                .Where(p => partidosSeleccionados.Contains(p.Id) && p.Estado == EstadoPartido.Programado)
+                .ToListAsync();
+
+            if (partidos.Count != partidosSeleccionados.Count)
+            {
+                TempData["Error"] = "Algunos partidos seleccionados no están disponibles.";
+                return RedirectToAction("ApuestaCombinada");
+            }
+
+            // Crear la apuesta combinada
+            var apuestaCombinada = new ApuestaCombinada
+            {
+                UsuarioId = usuario.Id,
+                MontoApostado = montoTotal,
+                FechaApuesta = DateTime.Now,
+                Estado = EstadoApuesta.Activa
+            };
+
+            _context.ApuestasCombinadas.Add(apuestaCombinada);
+            await _context.SaveChangesAsync();
+
+            // Crear los detalles de la apuesta
+            decimal cuotaTotal = 1.0m;
+            for (int i = 0; i < partidosSeleccionados.Count; i++)
+            {
+                var partido = partidos.First(p => p.Id == partidosSeleccionados[i]);
+                var tipoApuesta = (TipoApuesta)tiposApuesta[i];
+
+                decimal cuota = tipoApuesta switch
+                {
+                    TipoApuesta.GanaLocal => partido.CuotaLocal,
+                    TipoApuesta.Empate => partido.CuotaEmpate,
+                    TipoApuesta.GanaVisitante => partido.CuotaVisitante,
+                    _ => 1.0m
+                };
+
+                cuotaTotal *= cuota;
+
+                var detalle = new DetalleApuestaCombinada
+                {
+                    ApuestaCombinada = apuestaCombinada,
+                    PartidoId = partidosSeleccionados[i],
+                    TipoApuesta = tipoApuesta,
+                    CuotaSeleccionada = cuota
+                };
+
+                _context.Add(detalle);
+            }
+
+            // Actualizar cuota total y ganancia potencial
+            apuestaCombinada.CuotaTotal = cuotaTotal;
+            apuestaCombinada.PosibleGanancia = montoTotal * cuotaTotal;
+
+            // Descontar saldo del usuario
+            usuario.Saldo -= montoTotal;
+            await _userManager.UpdateAsync(usuario);
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"Apuesta combinada creada exitosamente. Ganancia potencial: ${apuestaCombinada.PosibleGanancia:F2}";
+            return RedirectToAction("MisApuestasCombinadas");
         }
 
         [HttpGet]

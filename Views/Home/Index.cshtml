@@ -50,7 +50,7 @@
                     </div>
                 </div>
 
-                @if (User.Identity.IsAuthenticated)
+                @if (User.Identity?.IsAuthenticated == true)
                 {
                     <div class="mb-4">
                         <h4 class="text-success">¡Bienvenido de vuelta, @await Component.InvokeAsync("NombreUsuario")!</h4>

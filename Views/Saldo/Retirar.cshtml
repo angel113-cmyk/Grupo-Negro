@@ -1,91 +1,252 @@
-@model Grupo_negro.Models.RetiroViewModel
-
+@model RetiroViewModel
 @{
     ViewData["Title"] = "Retirar Dinero";
 }
 
-<div class="container mt-4">
+<div class="container py-4">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h4><i class="fas fa-minus-circle"></i> Retirar Dinero</h4>
-                    <small class="text-muted">Saldo disponible: $@ViewBag.SaldoDisponible.ToString("N2")</small>
+        <div class="col-md-8 col-lg-6">
+            <!-- Encabezado -->
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-money-bill-wave me-2"></i>Retirar Dinero
+                    </h3>
                 </div>
+
                 <div class="card-body">
-                    <form asp-action="Retirar" method="post">
+                    <!-- Información del saldo actual -->
+                    <div class="alert alert-info">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-wallet me-2"></i>
+                                <strong>Saldo Disponible:</strong>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 text-primary">$@ViewBag.SaldoActual?.ToString("N2")</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mensajes de éxito/error -->
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show">
+                            <i class="fas fa-check-circle me-2"></i>
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <!-- Formulario de retiro -->
+                    <form asp-action="Retirar" method="post" id="formRetiro">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                        
+
+                        <!-- Monto a retirar -->
                         <div class="mb-3">
-                            <label asp-for="Monto" class="form-label"></label>
+                            <label asp-for="Monto" class="form-label">
+                                <i class="fas fa-dollar-sign me-1"></i>Monto a Retirar
+                            </label>
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
-                                <input asp-for="Monto" class="form-control" placeholder="0.00" step="0.01" max="@ViewBag.SaldoDisponible" />
+                                <input asp-for="Monto" 
+                                       class="form-control" 
+                                       type="number" 
+                                       step="0.01" 
+                                       min="10" 
+                                       placeholder="0.00"
+                                       id="montoRetiro" />
                             </div>
                             <span asp-validation-for="Monto" class="text-danger"></span>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Monto mínimo: $10.00 | Máximo: $@ViewBag.SaldoActual?.ToString("N2")
+                            </div>
                         </div>
 
+                        <!-- Método de retiro -->
                         <div class="mb-3">
-                            <label asp-for="MetodoRetiro" class="form-label"></label>
+                            <label asp-for="MetodoRetiro" class="form-label">
+                                <i class="fas fa-credit-card me-1"></i>Método de Retiro
+                            </label>
                             <select asp-for="MetodoRetiro" class="form-select" id="metodoRetiro">
-                                <option value="">Selecciona un método</option>
-                                <option value="1">PayPal</option>
-                                <option value="2">Yape</option>
+                                <option value="">Seleccionar método...</option>
+                                <option value="Transferencia">Transferencia Bancaria</option>
+                                <option value="PayPal">PayPal</option>
+                                <option value="Yape">Yape</option>
+                                <option value="Plin">Plin</option>
+                                <option value="MercadoPago">MercadoPago</option>
                             </select>
                             <span asp-validation-for="MetodoRetiro" class="text-danger"></span>
                         </div>
 
-                        <div class="mb-3" id="paypal-section" style="display: none;">
-                            <label asp-for="EmailPayPal" class="form-label">
-                                <i class="fab fa-paypal"></i> Email de PayPal
+                        <!-- Información de cuenta -->
+                        <div class="mb-3" id="infoCuenta" style="display: none;">
+                            <label asp-for="InformacionCuenta" class="form-label">
+                                <i class="fas fa-university me-1"></i>
+                                <span id="labelCuenta">Información de Cuenta</span>
                             </label>
-                            <input asp-for="EmailPayPal" class="form-control" type="email" placeholder="tu@email.com" />
-                            <span asp-validation-for="EmailPayPal" class="text-danger"></span>
+                            <input asp-for="InformacionCuenta" 
+                                   class="form-control" 
+                                   placeholder="Ingrese los datos de su cuenta"
+                                   id="inputCuenta" />
+                            <span asp-validation-for="InformacionCuenta" class="text-danger"></span>
+                            <div class="form-text" id="helpCuenta">
+                                <!-- Se actualiza dinámicamente -->
+                            </div>
                         </div>
 
-                        <div class="mb-3" id="yape-section" style="display: none;">
-                            <label asp-for="NumeroTelefono" class="form-label">
-                                <i class="fas fa-mobile-alt"></i> Número de teléfono para Yape
+                        <!-- Concepto/Descripción -->
+                        <div class="mb-3">
+                            <label asp-for="Concepto" class="form-label">
+                                <i class="fas fa-comment me-1"></i>Concepto (Opcional)
                             </label>
-                            <input asp-for="NumeroTelefono" class="form-control" type="tel" placeholder="+51 999 999 999" />
-                            <span asp-validation-for="NumeroTelefono" class="text-danger"></span>
+                            <input asp-for="Concepto" 
+                                   class="form-control" 
+                                   placeholder="Ej: Retiro de ganancias" />
+                            <span asp-validation-for="Concepto" class="text-danger"></span>
                         </div>
 
+                        <!-- Información importante -->
                         <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <strong>Importante:</strong> Los retiros pueden tardar hasta 24 horas en procesarse. 
-                            Asegúrate de que los datos de contacto sean correctos.
+                            <h6><i class="fas fa-exclamation-triangle me-2"></i>Información Importante:</h6>
+                            <ul class="mb-0 small">
+                                <li>Los retiros se procesan en <strong>24-48 horas hábiles</strong></li>
+                                <li>Monto mínimo de retiro: <strong>$10.00</strong></li>
+                                <li>Verifica que tus datos bancarios sean correctos</li>
+                                <li>Una vez procesado, el retiro no se puede cancelar</li>
+                                <li>Podrían aplicarse comisiones según el método elegido</li>
+                            </ul>
                         </div>
 
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="@Url.Action("Index", "Saldo")" class="btn btn-secondary me-md-2">
-                                <i class="fas fa-arrow-left"></i> Volver
+                        <!-- Botones de acción -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Cancelar
                             </a>
-                            <button type="submit" class="btn btn-warning">
-                                <i class="fas fa-money-bill-wave"></i> Procesar Retiro
+                            <button type="submit" class="btn btn-danger" id="btnRetirar">
+                                <i class="fas fa-money-bill-wave me-1"></i>Solicitar Retiro
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <!-- Información adicional -->
+            <div class="mt-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card border-info">
+                            <div class="card-body text-center">
+                                <i class="fas fa-clock fa-2x text-info mb-2"></i>
+                                <h6>Tiempo de Procesamiento</h6>
+                                <small class="text-muted">24-48 horas hábiles</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-success">
+                            <div class="card-body text-center">
+                                <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
+                                <h6>Transacciones Seguras</h6>
+                                <small class="text-muted">Protección SSL 256-bit</small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<script>
-    document.getElementById('metodoRetiro').addEventListener('change', function() {
-        var paypalSection = document.getElementById('paypal-section');
-        var yapeSection = document.getElementById('yape-section');
-        
-        // Ocultar ambas secciones
-        paypalSection.style.display = 'none';
-        yapeSection.style.display = 'none';
-        
-        // Mostrar la sección correspondiente
-        if (this.value === '1') { // PayPal
-            paypalSection.style.display = 'block';
-        } else if (this.value === '2') { // Yape
-            yapeSection.style.display = 'block';
-        }
-    });
-</script>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const metodoSelect = document.getElementById('metodoRetiro');
+            const infoCuentaDiv = document.getElementById('infoCuenta');
+            const labelCuenta = document.getElementById('labelCuenta');
+            const inputCuenta = document.getElementById('inputCuenta');
+            const helpCuenta = document.getElementById('helpCuenta');
+            const montoInput = document.getElementById('montoRetiro');
+            const btnRetirar = document.getElementById('btnRetirar');
+
+            // Configurar campos según método de retiro
+            metodoSelect.addEventListener('change', function() {
+                const metodo = this.value;
+                
+                if (metodo) {
+                    infoCuentaDiv.style.display = 'block';
+                    
+                    switch(metodo) {
+                        case 'Transferencia':
+                            labelCuenta.textContent = 'Número de Cuenta Bancaria';
+                            inputCuenta.placeholder = 'Ej: 1234-5678-9012-3456';
+                            helpCuenta.textContent = 'Ingrese el número completo de su cuenta bancaria';
+                            break;
+                        case 'PayPal':
+                            labelCuenta.textContent = 'Email de PayPal';
+                            inputCuenta.placeholder = 'Ej: usuario@paypal.com';
+                            helpCuenta.textContent = 'Email asociado a su cuenta de PayPal';
+                            break;
+                        case 'Yape':
+                            labelCuenta.textContent = 'Número de Teléfono Yape';
+                            inputCuenta.placeholder = 'Ej: +51 999 999 999';
+                            helpCuenta.textContent = 'Número de celular registrado en Yape';
+                            break;
+                        case 'Plin':
+                            labelCuenta.textContent = 'Número de Teléfono Plin';
+                            inputCuenta.placeholder = 'Ej: +51 999 999 999';
+                            helpCuenta.textContent = 'Número de celular registrado en Plin';
+                            break;
+                        case 'MercadoPago':
+                            labelCuenta.textContent = 'Email de MercadoPago';
+                            inputCuenta.placeholder = 'Ej: usuario@mercadopago.com';
+                            helpCuenta.textContent = 'Email asociado a su cuenta de MercadoPago';
+                            break;
+                    }
+                } else {
+                    infoCuentaDiv.style.display = 'none';
+                }
+            });
+
+            // Validar monto en tiempo real
+            montoInput.addEventListener('input', function() {
+                const monto = parseFloat(this.value);
+                const saldoDisponible = @(ViewBag.SaldoActual ?? 0);
+                
+                if (monto < 10) {
+                    btnRetirar.disabled = true;
+                    this.classList.add('is-invalid');
+                } else if (monto > saldoDisponible) {
+                    btnRetirar.disabled = true;
+                    this.classList.add('is-invalid');
+                } else {
+                    btnRetirar.disabled = false;
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                }
+            });
+
+            // Confirmar antes de enviar
+            document.getElementById('formRetiro').addEventListener('submit', function(e) {
+                const monto = document.getElementById('montoRetiro').value;
+                const metodo = document.getElementById('metodoRetiro').value;
+                
+                if (!confirm(`¿Está seguro que desea retirar $${monto} mediante ${metodo}?`)) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+}

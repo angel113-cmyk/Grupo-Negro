@@ -1,0 +1,225 @@
+@using Grupo_negro.ViewModels
+@model RecomendacionesViewModel
+@{
+    ViewData["Title"] = "Recomendaciones ML";
+}
+
+<div class="container-fluid py-4">
+    <!-- Encabezado -->
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 mb-1">⭐ Recomendaciones de Apuestas</h1>
+                    <p class="text-muted">Sugerencias inteligentes basadas en Machine Learning</p>
+                </div>
+                <div>
+                    <a href="@Url.Action("Dashboard")" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left"></i> Dashboard ML
+                    </a>
+                    <a href="@Url.Action("ExportarRecomendaciones")" class="btn btn-success">
+                        <i class="fas fa-download"></i> Exportar CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-1">@Model.TotalRecomendaciones</h3>
+                    <small>Total Recomendaciones</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-1">@Model.RecomendacionesFuertes</h3>
+                    <small>Confianza Alta (80%+)</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-1">@Model.RecomendacionesModeradas</h3>
+                    <small>Confianza Media (65-80%)</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-1">@((Model.FechaGeneracion).ToString("HH:mm"))</h3>
+                    <small>Última Actualización</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de recomendaciones -->
+    <div class="row">
+        @if (Model.Recomendaciones.Any())
+        {
+            @foreach (var rec in Model.Recomendaciones)
+            {
+                <div class="col-lg-6 col-xl-4 mb-4">
+                    <div class="card h-100 @(rec.ConfianzaML >= 80 ? "border-success" : rec.ConfianzaML >= 65 ? "border-warning" : "border-secondary")" style="border-width: 2px;">
+                        <!-- Header -->
+                        <div class="card-header @(rec.ConfianzaML >= 80 ? "bg-success" : rec.ConfianzaML >= 65 ? "bg-warning" : "bg-secondary") text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">@rec.TipoApuesta</h6>
+                                <span class="badge bg-light text-dark">
+                                    @rec.ConfianzaML.ToString("F0")% Confianza
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Partido -->
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <h5 class="card-title">@rec.EquipoLocal vs @rec.EquipoVisitante</h5>
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar"></i> @rec.FechaPartido.ToString("dd/MM/yyyy HH:mm")
+                                </small>
+                            </div>
+
+                            <!-- Resultado recomendado -->
+                            <div class="text-center mb-3">
+                                <div class="badge bg-primary fs-6 p-2">
+                                    @(rec.ResultadoRecomendado == "Local" ? "🏠" : rec.ResultadoRecomendado == "Visitante" ? "✈️" : "⚖️") 
+                                    @rec.ResultadoRecomendado
+                                </div>
+                            </div>
+
+                            <!-- Probabilidades -->
+                            <div class="mb-3">
+                                <small class="text-muted">Probabilidades ML:</small>
+                                <div class="row text-center small mt-1">
+                                    <div class="col-4">
+                                        <div class="progress mb-1" style="height: 4px;">
+                                            <div class="progress-bar bg-primary" style="width: @(rec.ProbabilidadLocal.ToString("F0"))%"></div>
+                                        </div>
+                                        <strong>@rec.ProbabilidadLocal.ToString("F1")%</strong><br>
+                                        <small class="text-muted">Local</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="progress mb-1" style="height: 4px;">
+                                            <div class="progress-bar bg-warning" style="width: @(rec.ProbabilidadEmpate.ToString("F0"))%"></div>
+                                        </div>
+                                        <strong>@rec.ProbabilidadEmpate.ToString("F1")%</strong><br>
+                                        <small class="text-muted">Empate</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="progress mb-1" style="height: 4px;">
+                                            <div class="progress-bar bg-success" style="width: @(rec.ProbabilidadVisitante.ToString("F0"))%"></div>
+                                        </div>
+                                        <strong>@rec.ProbabilidadVisitante.ToString("F1")%</strong><br>
+                                        <small class="text-muted">Visitante</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sugerencia de apuesta -->
+                            <div class="bg-light p-2 rounded">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <small class="text-muted">💰 Monto sugerido:</small><br>
+                                        <strong class="text-success">$@rec.MontoSugerido.ToString("F2")</strong>
+                                    </div>
+                                    <div class="text-end">
+                                        <small class="text-muted">Valor IA:</small><br>
+                                        <span class="badge bg-info">@rec.ValorApuesta.ToString("F1")/10</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    @if (rec.ConfianzaML >= 80)
+                                    {
+                                        <span class="badge bg-success">🔥 Alta Confianza</span>
+                                    }
+                                    else if (rec.ConfianzaML >= 65)
+                                    {
+                                        <span class="badge bg-warning">⚡ Moderada</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">⚠️ Conservadora</span>
+                                    }
+                                </div>
+                                <a href="@Url.Action("Details", "Apuestas", new { id = rec.PartidoId })" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-coins"></i> Apostar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <!-- No hay recomendaciones -->
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-lightbulb fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">No hay recomendaciones disponibles</h4>
+                    <p class="text-muted">No se encontraron partidos con suficiente confianza para recomendar apuestas.</p>
+                    <div class="mt-3">
+                        <a href="@Url.Action("Dashboard")" class="btn btn-primary me-2">
+                            <i class="fas fa-brain"></i> Entrenar Modelo
+                        </a>
+                        <a href="@Url.Action("Predicciones")" class="btn btn-outline-primary">
+                            <i class="fas fa-crystal-ball"></i> Ver Predicciones
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h6><i class="fas fa-info-circle"></i> Información Importante:</h6>
+                <ul class="mb-0 small">
+                    <li>Las recomendaciones se basan en algoritmos de Machine Learning y análisis estadístico.</li>
+                    <li>No garantizan resultados. Siempre apuesta de forma responsable.</li>
+                    <li>Los montos sugeridos son orientativos. Ajústalos según tu presupuesto.</li>
+                    <li>La confianza del modelo se basa en datos históricos y puede variar.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: transform 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .border-success {
+        border-color: #198754 !important;
+    }
+    
+    .border-warning {
+        border-color: #ffc107 !important;
+    }
+    
+    .border-secondary {
+        border-color: #6c757d !important;
+    }
+</style>

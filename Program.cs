@@ -49,6 +49,16 @@ builder.Services.AddScoped<Grupo_negro.Services.ApuestaCombinadadService>();
 builder.Services.AddHttpClient<Grupo_negro.Services.IFootballApiService, Grupo_negro.Services.FootballApiService>();
 builder.Services.AddScoped<Grupo_negro.Services.IFootballApiService, Grupo_negro.Services.FootballApiService>();
 
+// Registrar servicios de Pagos
+builder.Services.Configure<MercadoPagoSettings>(builder.Configuration.GetSection("MercadoPago"));
+builder.Services.AddHttpClient<Grupo_negro.Services.MercadoPagoService>();
+builder.Services.AddScoped<Grupo_negro.Services.MercadoPagoService>();
+builder.Services.AddScoped<Grupo_negro.Services.IPagosService, Grupo_negro.Services.PagosService>();
+
+// Registrar servicios de Machine Learning
+builder.Services.AddScoped<Grupo_negro.Services.MLTrainingService>();
+builder.Services.AddScoped<Grupo_negro.Services.MLPredictionService>();
+
 // Configurar sesiones para el carrito de apuestas
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>

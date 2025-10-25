@@ -380,6 +380,10 @@ namespace Grupo_negro.Migrations
                     b.Property<int>("LigaId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Resultado")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("EquipoLocalId");
@@ -389,6 +393,82 @@ namespace Grupo_negro.Migrations
                     b.HasIndex("LigaId");
 
                     b.ToTable("Partidos");
+                });
+
+            modelBuilder.Entity("Grupo_negro.Models.Transaccion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ApuestaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Descripcion")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("FechaCompletado")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MercadoPagoCollectionId")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MercadoPagoPaymentId")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MercadoPagoPreferenceId")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MercadoPagoStatus")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("MetodoPago")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Monto")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("NumeroOperacion")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PayPalOrderId")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PayPalPaymentId")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ReferenciaPago")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApuestaId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("Transacciones");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -643,6 +723,24 @@ namespace Grupo_negro.Migrations
                     b.Navigation("Liga");
                 });
 
+            modelBuilder.Entity("Grupo_negro.Models.Transaccion", b =>
+                {
+                    b.HasOne("Grupo_negro.Models.Apuesta", "Apuesta")
+                        .WithMany()
+                        .HasForeignKey("ApuestaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Grupo_negro.Models.ApplicationUser", "Usuario")
+                        .WithMany("Transacciones")
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Apuesta");
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -697,6 +795,8 @@ namespace Grupo_negro.Migrations
             modelBuilder.Entity("Grupo_negro.Models.ApplicationUser", b =>
                 {
                     b.Navigation("Bonos");
+
+                    b.Navigation("Transacciones");
                 });
 
             modelBuilder.Entity("Grupo_negro.Models.ApuestaCombinada", b =>
