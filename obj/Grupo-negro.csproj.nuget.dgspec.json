@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\rs_va\\OneDrive\\Desktop\\Grupo-negro\\Grupo-negro.csproj": {}
+    "C:\\Users\\User\\Downloads\\grupex\\Grupo-Negro\\Grupo-negro.csproj": {}
   },
   "projects": {
-    "C:\\Users\\rs_va\\OneDrive\\Desktop\\Grupo-negro\\Grupo-negro.csproj": {
+    "C:\\Users\\User\\Downloads\\grupex\\Grupo-Negro\\Grupo-negro.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\rs_va\\OneDrive\\Desktop\\Grupo-negro\\Grupo-negro.csproj",
+        "projectUniqueName": "C:\\Users\\User\\Downloads\\grupex\\Grupo-Negro\\Grupo-negro.csproj",
         "projectName": "Grupo-negro",
-        "projectPath": "C:\\Users\\rs_va\\OneDrive\\Desktop\\Grupo-negro\\Grupo-negro.csproj",
-        "packagesPath": "C:\\Users\\rs_va\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\rs_va\\OneDrive\\Desktop\\Grupo-negro\\obj\\",
+        "projectPath": "C:\\Users\\User\\Downloads\\grupex\\Grupo-Negro\\Grupo-negro.csproj",
+        "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\User\\Downloads\\grupex\\Grupo-Negro\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\rs_va\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
@@ -44,6 +44,14 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
+            "Google.Apis.Auth": {
+              "target": "Package",
+              "version": "[1.72.0, )"
+            },
+            "Google.Cloud.AIPlatform.V1": {
+              "target": "Package",
+              "version": "[3.54.0, )"
+            },
             "MercadoPago": {
               "target": "Package",
               "version": "[1.0.4477.31589, )"
@@ -74,13 +82,41 @@
               "target": "Package",
               "version": "[4.0.2, )"
             },
+            "Microsoft.SemanticKernel": {
+              "target": "Package",
+              "version": "[1.67.0, )"
+            },
+            "Microsoft.SemanticKernel.Connectors.OpenAI": {
+              "target": "Package",
+              "version": "[1.67.0, )"
+            },
             "Newtonsoft.Json": {
               "target": "Package",
               "version": "[13.0.4, )"
             },
+            "OllamaSharp": {
+              "target": "Package",
+              "version": "[5.4.8, )"
+            },
             "PayPalCheckoutSdk": {
               "target": "Package",
               "version": "[1.0.4, )"
+            },
+            "PdfPig": {
+              "target": "Package",
+              "version": "[0.1.11, )"
+            },
+            "Swashbuckle.AspNetCore": {
+              "target": "Package",
+              "version": "[9.0.6, )"
+            },
+            "System.Text.Json": {
+              "target": "Package",
+              "version": "[9.0.10, )"
+            },
+            "itext7": {
+              "target": "Package",
+              "version": "[9.3.0, )"
             }
           },
           "imports": [

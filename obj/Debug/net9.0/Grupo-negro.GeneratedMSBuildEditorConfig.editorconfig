@@ -17,169 +17,173 @@ build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = Grupo_negro
 build_property.RootNamespace = Grupo_negro
-build_property.ProjectDir = C:\Users\rs_va\OneDrive\Desktop\Grupo-negro\
+build_property.ProjectDir = C:\Users\User\Downloads\grupex\Grupo-Negro\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 9.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = C:\Users\rs_va\OneDrive\Desktop\Grupo-negro
+build_property.MSBuildProjectDirectory = C:\Users\User\Downloads\grupex\Grupo-Negro
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 9.0
 build_property.EnableCodeStyleSeverity = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Account/Login.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Account/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxMb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Account/Register.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Account/Register.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxSZWdpc3Rlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Admin/Apuestas.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Admin/Apuestas.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQXB1ZXN0YXMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Admin/AsignarBonos.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Admin/AsignarBonos.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQXNpZ25hckJvbm9zLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Admin/CrearPartido.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Admin/CrearPartido.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQ3JlYXJQYXJ0aWRvLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Admin/DetalleUsuario.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Admin/DetalleUsuario.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRGV0YWxsZVVzdWFyaW8uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Admin/Index.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Admin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Admin/Partidos.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Admin/Partidos.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cUGFydGlkb3MuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Admin/Usuarios.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Admin/Usuarios.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cVXN1YXJpb3MuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Admin/UsuariosNuevos.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Admin/UsuariosNuevos.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cVXN1YXJpb3NOdWV2b3MuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Apuestas/Apostar.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Apuestas/Apostar.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXB1ZXN0YXNcQXBvc3Rhci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Apuestas/ApuestaCombinada.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Apuestas/ApuestaCombinada.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXB1ZXN0YXNcQXB1ZXN0YUNvbWJpbmFkYS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Apuestas/CarritoApuestas.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Apuestas/CarritoApuestas.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXB1ZXN0YXNcQ2Fycml0b0FwdWVzdGFzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Apuestas/Index.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Apuestas/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXB1ZXN0YXNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Apuestas/MisApuestas.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Apuestas/MisApuestas.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXB1ZXN0YXNcTWlzQXB1ZXN0YXMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Apuestas/MisApuestasCombinadas.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Apuestas/MisApuestasCombinadas.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXB1ZXN0YXNcTWlzQXB1ZXN0YXNDb21iaW5hZGFzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Apuestas/_PartidosPartial.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Apuestas/_PartidosPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXB1ZXN0YXNcX1BhcnRpZG9zUGFydGlhbC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Comentarios/Editar.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Comentarios/Editar.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29tZW50YXJpb3NcRWRpdGFyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Comentarios/Index.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Comentarios/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29tZW50YXJpb3NcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/FootballApi/Index.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/FootballApi/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRm9vdGJhbGxBcGlcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Home/Index.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Home/Privacy.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/ML/Dashboard.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/ML/Dashboard.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTUxcRGFzaGJvYXJkLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/ML/Predicciones.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/ML/Predicciones.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTUxcUHJlZGljY2lvbmVzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/ML/Recomendaciones.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/ML/Recomendaciones.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTUxcUmVjb21lbmRhY2lvbmVzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/ML/Rendimiento.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/ML/Rendimiento.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTUxcUmVuZGltaWVudG8uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Saldo/CheckoutMercadoPagoSimulado.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Saldo/CheckoutMercadoPagoSimulado.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2FsZG9cQ2hlY2tvdXRNZXJjYWRvUGFnb1NpbXVsYWRvLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Saldo/Depositar.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Saldo/Depositar.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2FsZG9cRGVwb3NpdGFyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Saldo/Historial.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Saldo/Historial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2FsZG9cSGlzdG9yaWFsLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Saldo/Index.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Saldo/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2FsZG9cSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Saldo/Retirar.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Saldo/Retirar.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2FsZG9cUmV0aXJhci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Shared/Components/NombreUsuario/Default.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Shared/Components/NombreUsuario/Default.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXENvbXBvbmVudHNcTm9tYnJlVXN1YXJpb1xEZWZhdWx0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Shared/Components/SaldoUsuario/Default.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Shared/Components/SaldoUsuario/Default.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXENvbXBvbmVudHNcU2FsZG9Vc3VhcmlvXERlZmF1bHQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Shared/Error.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Shared/_ValidationScriptsPartial.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Shared/_Chatbot.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9DaGF0Ym90LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Tienda/Index.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Tienda/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGllbmRhXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/_ViewImports.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/_ViewStart.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/rs_va/OneDrive/Desktop/Grupo-negro/Views/Shared/_Layout.cshtml]
+[C:/Users/User/Downloads/grupex/Grupo-Negro/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-qsf8yzgixx

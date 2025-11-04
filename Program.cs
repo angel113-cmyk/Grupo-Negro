@@ -6,9 +6,19 @@ using Grupo_negro.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<SemanticKernelService>();
+builder.Services.AddScoped<ChatService>();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => 
 {

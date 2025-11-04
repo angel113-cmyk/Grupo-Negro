@@ -1,0 +1,529 @@
+@{
+    Layout = null;
+}
+
+<div id="chatPopup" class="chat-popup-container">
+    <div class="chat-header bg-primary text-white p-3 rounded-top">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-robot fa-lg me-2"></i>
+                <h5 class="mb-0">APUESTAKONG</h5>
+                <span class="badge bg-success ms-2">
+                    <i class="fas fa-circle me-1"></i>En línea
+                </span>
+            </div>
+            <div class="chat-controls">
+                <button type="button" class="btn btn-sm btn-outline-light me-1" id="clearHistoryBtn" title="Limpiar historial">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-light" id="toggleChatBtn" title="Minimizar">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </div>
+        </div>
+        <small class="opacity-75">Asistente de apuestas responsables</small>
+    </div>
+
+    <div class="chat-messages-container" id="chat-content">
+        <!-- Mensaje de bienvenida -->
+        <div class="alert alert-info welcome-message">
+            <div class="d-flex">
+                <div class="flex-shrink-0 me-3">
+                    <i class="fas fa-robot text-primary fa-lg"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <strong>¡Hola! 👋</strong><br>
+                    Soy <strong>APUESTAKONG</strong>, tu asistente especializado en apuestas responsables. 
+                    ¿En qué puedo ayudarte hoy?
+                    <div class="mt-2">
+                        <small>Puedo ayudarte con: registro, apuestas, cuotas y juego responsable.</small>
+                    </div>
+                    <div class="message-time text-muted mt-1">@DateTime.Now.ToString("h:mm tt")</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicador de typing -->
+    <div id="typing-indicator" class="typing-indicator" style="display: none;">
+        <div class="d-flex align-items-center px-3 py-2">
+            <div class="typing-avatar me-2">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="typing-content">
+                <div class="typing-text">APUESTAKONG está escribiendo</div>
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botones de acción rápida -->
+    <div class="quick-actions p-2 border-top">
+        <div class="row g-1">
+            <div class="col-6">
+                <button type="button" class="btn btn-outline-primary btn-sm w-100 quick-action-btn" data-message="¿Cómo me registro en APUESTAKONG?">
+                    <i class="fas fa-user-plus me-1"></i>Registro
+                </button>
+            </div>
+            <div class="col-6">
+                <button type="button" class="btn btn-outline-primary btn-sm w-100 quick-action-btn" data-message="Explícame cómo apostar responsablemente">
+                    <i class="fas fa-coins me-1"></i>Apostar
+                </button>
+            </div>
+            <div class="col-6">
+                <button type="button" class="btn btn-outline-warning btn-sm w-100 quick-action-btn" data-message="Necesito ayuda con ludopatía">
+                    <i class="fas fa-shield-alt me-1"></i>Ayuda
+                </button>
+            </div>
+            <div class="col-6">
+                <button type="button" class="btn btn-outline-info btn-sm w-100 quick-action-btn" data-message="¿Qué deportes están disponibles para apostar?">
+                    <i class="fas fa-futbol me-1"></i>Deportes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario de chat -->
+    <form method="post" id="chat-form" class="chat-form p-3 border-top bg-light">
+        <div class="input-group">
+            <textarea id="chat-input" name="userMessage" class="form-control" 
+                      placeholder="Escribe tu mensaje..." 
+                      rows="1"
+                      maxlength="500"
+                      required></textarea>
+            <button type="submit" class="btn btn-primary send-btn" id="chat-send">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+        <div class="form-footer mt-2">
+            <small class="text-muted">
+                <i class="fas fa-info-circle me-1"></i>
+                APUESTAKONG - Juego responsable
+            </small>
+        </div>
+    </form>
+</div>
+
+<style>
+    /* === ESTILOS MEJORADOS === */
+    .chat-popup-container {
+        position: fixed;
+        bottom: 80px;
+        right: 20px;
+        width: 380px;
+        max-width: 90vw;
+        height: 600px;
+        max-height: 80vh;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        display: flex;
+        flex-direction: column;
+        z-index: 10000;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    .chat-header {
+        border-radius: 12px 12px 0 0;
+        flex-shrink: 0;
+    }
+
+    .chat-messages-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        background: #f8f9fa;
+    }
+
+    /* Mensajes */
+    .alert {
+        border: none;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .alert-primary {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        margin-left: 40px;
+    }
+
+    .alert-success {
+        background: white;
+        color: #333;
+        border-left: 4px solid #28a745;
+        margin-right: 40px;
+    }
+
+    .welcome-message {
+        background: linear-gradient(135deg, #e3f2fd, #bbdefb) !important;
+        border-left: 4px solid #2196f3 !important;
+    }
+
+    .message-time {
+        font-size: 0.75rem;
+        opacity: 0.8;
+    }
+
+    /* Typing indicator */
+    .typing-indicator {
+        background: white;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .typing-avatar {
+        width: 32px;
+        height: 32px;
+        background: #6c757d;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 14px;
+    }
+
+    .typing-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-bottom: 2px;
+    }
+
+    .typing-dots {
+        display: flex;
+        gap: 3px;
+    }
+
+    .typing-dots span {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #6c757d;
+        animation: typingBounce 1.4s infinite ease-in-out;
+    }
+
+    .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+    
+
+    /* Botones de acción rápida */
+    .quick-actions {
+        flex-shrink: 0;
+        background: white;
+    }
+
+    .quick-action-btn {
+        font-size: 0.75rem;
+        padding: 6px 8px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .quick-action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    /* Formulario */
+    .chat-form {
+        flex-shrink: 0;
+        border-radius: 0 0 12px 12px;
+    }
+
+    #chat-input {
+        border-radius: 20px;
+        padding: 12px 16px;
+        resize: none;
+        border: 2px solid #e9ecef;
+        transition: all 0.2s ease;
+    }
+
+    #chat-input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+
+    .send-btn {
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .send-btn:hover {
+        transform: scale(1.05);
+    }
+
+    /* Scrollbar personalizado */
+    .chat-messages-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .chat-messages-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    .chat-messages-container::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+
+    .chat-messages-container::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+
+    /* Responsive */
+    @@media (max-width: 480px) {
+        .chat-popup-container {
+            width: 95vw;
+            height: 70vh;
+            bottom: 10px;
+            right: 2.5vw;
+            left: 2.5vw;
+        }
+    }
+    /* Estado minimizado */
+    .chat-popup-container.minimized {
+        height: auto; /* que sólo se vea el header */
+        width: 320px;
+        max-height: none;
+        overflow: visible;
+    }
+
+    .chat-popup-container.minimized .chat-messages-container,
+    .chat-popup-container.minimized .typing-indicator,
+    .chat-popup-container.minimized .quick-actions,
+    .chat-popup-container.minimized .chat-form {
+        display: none !important;
+    }
+
+    .chat-popup-container.minimized .chat-header {
+        border-radius: 12px;
+    }
+
+    .chat-popup-container {
+        transition: height 0.25s ease, width 0.25s ease;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Inicialización
+        let sessionId = getSessionId();
+        fetchChatHistory(sessionId);
+        
+        // Elementos del DOM
+        const chatForm = document.getElementById("chat-form");
+        const chatInput = document.getElementById("chat-input");
+        const chatContent = document.getElementById("chat-content");
+        const typingIndicator = document.getElementById("typing-indicator");
+        const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+    const toggleChatBtn = document.getElementById("toggleChatBtn");
+    const chatPopup = document.getElementById("chatPopup");
+        const quickActionBtns = document.querySelectorAll('.quick-action-btn');
+
+        // Auto-resize del textarea
+        chatInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        // Botones de acción rápida
+        quickActionBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const message = this.getAttribute('data-message');
+                chatInput.value = message;
+                chatForm.dispatchEvent(new Event('submit'));
+            });
+        });
+
+        // Limpiar historial
+        clearHistoryBtn.addEventListener('click', function() {
+            if (confirm('¿Estás seguro de que quieres limpiar el historial de chat?')) {
+                localStorage.removeItem("chatSessionId");
+                chatContent.innerHTML = `
+                    <div class="alert alert-info welcome-message">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0 me-3">
+                                <i class="fas fa-robot text-primary fa-lg"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <strong>¡Historial limpiado! 🗑️</strong><br>
+                                La conversación ha comenzado de nuevo.
+                                <div class="message-time text-muted mt-1">${new Date().toLocaleTimeString()}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                sessionId = getSessionId(); // Nueva sesión
+            }
+        });
+
+        // Botón minimizar / restaurar
+        function applyMinimizedState(minimized) {
+            if (minimized) {
+                chatPopup.classList.add('minimized');
+                // Cambiar icono a plus
+                if (toggleChatBtn && toggleChatBtn.firstElementChild) {
+                    toggleChatBtn.firstElementChild.classList.remove('fa-minus');
+                    toggleChatBtn.firstElementChild.classList.add('fa-plus');
+                    toggleChatBtn.title = 'Restaurar';
+                }
+            } else {
+                chatPopup.classList.remove('minimized');
+                if (toggleChatBtn && toggleChatBtn.firstElementChild) {
+                    toggleChatBtn.firstElementChild.classList.remove('fa-plus');
+                    toggleChatBtn.firstElementChild.classList.add('fa-minus');
+                    toggleChatBtn.title = 'Minimizar';
+                }
+            }
+        }
+
+        // Leer estado guardado
+        try {
+            const saved = localStorage.getItem('chatMinimized');
+            if (saved === 'true') {
+                applyMinimizedState(true);
+            }
+        } catch (e) {
+            // Ignorar si localStorage no está disponible
+            console.warn('No se pudo leer chatMinimized de localStorage', e);
+        }
+
+        if (toggleChatBtn) {
+            toggleChatBtn.addEventListener('click', function() {
+                const isMin = chatPopup.classList.contains('minimized');
+                applyMinimizedState(!isMin);
+                try {
+                    localStorage.setItem('chatMinimized', String(!isMin));
+                } catch (e) {
+                    console.warn('No se pudo guardar chatMinimized en localStorage', e);
+                }
+            });
+        }
+
+        // Envío del formulario
+        chatForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+            const userMessage = chatInput.value.trim();
+            
+            if (userMessage === "") return;
+
+            // Agregar mensaje del usuario inmediatamente
+            appendMessage(`<strong>Tú:</strong> ${userMessage}`, "alert alert-primary");
+
+            // Mostrar indicador de typing
+            showTypingIndicator();
+
+            // Limpiar input y resetear altura
+            chatInput.value = "";
+            chatInput.style.height = 'auto';
+
+            // Enviar mensaje al servidor
+            $.ajax({
+                url: "/api/chat/",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ 
+                    userMessage: userMessage, 
+                    sessionId: sessionId 
+                }),
+                success: function (data) {
+                    hideTypingIndicator();
+                    // Usar la respuesta del servidor
+                    const response = typeof data === 'object' ? data.response : data;
+                    appendMessage(response, "alert alert-success");
+                },
+                error: function (xhr, status, error) {
+                    hideTypingIndicator();
+                    console.error("Chat request failed:", error);
+                    appendMessage("⚠️ Error de conexión. Intenta nuevamente.", "alert alert-danger");
+                }
+            });
+        });
+
+        function showTypingIndicator() {
+            typingIndicator.style.display = 'block';
+            scrollToBottom();
+        }
+
+        function hideTypingIndicator() {
+            typingIndicator.style.display = 'none';
+        }
+
+        function appendMessage(message, className) {
+            const messageDiv = document.createElement("div");
+            messageDiv.className = className;
+            messageDiv.innerHTML = message + `<div class="message-time text-muted mt-1">${new Date().toLocaleTimeString()}</div>`;
+            chatContent.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            setTimeout(() => {
+                chatContent.scrollTop = chatContent.scrollHeight;
+            }, 100);
+        }
+
+        function fetchChatHistory(sessionId) {
+            $.ajax({
+                url: `/api/chat/${sessionId}`, 
+                type: "GET",
+                contentType: "application/json",
+                success: function (data) {
+                    console.log("Historial cargado:", data);
+                    // Limpiar contenido excepto el mensaje de bienvenida
+                    const welcomeMsg = document.querySelector('.welcome-message');
+                    chatContent.innerHTML = '';
+                    if (welcomeMsg) {
+                        chatContent.appendChild(welcomeMsg);
+                    }
+
+                    // Cargar mensajes del historial
+                    data.forEach(function (messageObj) {
+                        const className = messageObj.sender === "User" 
+                            ? "text-end alert alert-primary" 
+                            : "alert alert-success";
+                        const message = messageObj.sender === "User" 
+                            ? `<strong>Tú:</strong> ${messageObj.message}` 
+                            : messageObj.message;
+                        appendMessage(message, className);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error cargando historial:", error);
+                    // Mantener el mensaje de bienvenida
+                }
+            });
+        }
+
+        // Funciones de utilidad (las mantienes igual)
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0,
+                    v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        function getSessionId() {
+            let sessionId = localStorage.getItem("chatSessionId");
+            if (!sessionId) {
+                sessionId = generateUUID();
+                localStorage.setItem("chatSessionId", sessionId);
+            }
+            return sessionId;
+        }
+    });
+</script>

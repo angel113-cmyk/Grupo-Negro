@@ -12,6 +12,8 @@ namespace Grupo_negro.Data
         }
 
         // DbSets para el sistema de apuestas deportivas
+
+        public DbSet<ChatMessage> ChatMessages { get; set; }
         public DbSet<Liga> Ligas { get; set; }
         public DbSet<Equipo> Equipos { get; set; }
         public DbSet<Partido> Partidos { get; set; }
@@ -25,6 +27,20 @@ namespace Grupo_negro.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<ChatMessage>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.SessionId).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Message).IsRequired().HasMaxLength(2000);
+                entity.Property(e => e.Sender).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Timestamp).IsRequired();
+                
+                // Índice para mejorar performance en consultas por sesión
+                entity.HasIndex(e => e.SessionId);
+                entity.HasIndex(e => e.Timestamp);
+            });
+
 
             // Configuraciones para el sistema de apuestas
             builder.Entity<Partido>(entity =>
